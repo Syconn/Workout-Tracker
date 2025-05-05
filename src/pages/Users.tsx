@@ -1,10 +1,10 @@
 import { useState } from "react";
 
-type PageProp = {
+type PageProps = {
     setPage: (auth: string) => void;
-};
+}
 
-type SignupMenuProps = PageProp & {
+type UserProps = PageProps & {
     setAuth: <K extends keyof AuthContext>(key: K, value: AuthContext[K]) => void;
 };
 
@@ -15,12 +15,12 @@ export interface AuthContext {
     email: string;
 }
 
-export function LoginMenu({ setPage }: PageProp) {
+export function LoginMenu({ setPage }: PageProps) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     return (
-        <>/
+        <>
         Login Screen
         <div />
             Username: 
@@ -29,21 +29,32 @@ export function LoginMenu({ setPage }: PageProp) {
             Password: 
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} />
         <div />
-            {/* <input type="button" value={"Login"} onClick={() => setPage("home")} /> */}
+            <input type="button" value={"Login"} onClick={() => setPage("home")} />
             <input type="button" value={"Sign Up"} onClick={() => setPage("signup")} />
         </>
     );
 }
 
-export function SignupMenu({ setPage, setAuth }: SignupMenuProps) {
+export function SignupMenu({ setPage, setAuth }: UserProps) {
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [password2, setPassword2] = useState("");
+    const [error, setError] = useState("");
 
     const handleSignup = () => {
+        if (!name.includes(" ")) {
+            setError("Requires First and Last Name");
+            return;
+        }
 
+        setAuth("name", name);
+        setAuth("email", email);
+        setAuth("username", username);
+        setAuth("password", password);
+
+        setPage("home");
     }
 
     return (
@@ -65,9 +76,10 @@ export function SignupMenu({ setPage, setAuth }: SignupMenuProps) {
             Confirm Password: 
             <input type="password" value={password2} onChange={e => setPassword2(e.target.value)} />
         <div />
-            <input type="button" value={"Login"} />
-            <input type="button" value={"Sign Up"} onChange={handleSignup} />
-        {"HEELLo"}
+            <input type="button" value={"Login"} onClick={() => setPage("login")}/>
+            <input type="button" value={"Sign Up"} onClick={handleSignup} />
+        <div />
+        {error}
         </>
     );
 }

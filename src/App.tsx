@@ -4,12 +4,12 @@ import { useSetProp } from './utils/Util';
 import './App.css'
 
 function App() {
-  const [page, setPage] = useState("login");
-
   const [authContext, setAuthContext] = useState<AuthContext>(() => {
     const stored = localStorage.getItem("authContext");
     return stored ? JSON.parse(stored) : { name: "", username: "", password: "", email: "" };
   });
+
+  const [page, setPage] = useState(authContext.name.length == 0 ? "login" : "home");
 
   useEffect(() => {
     localStorage.setItem("authContext", JSON.stringify(authContext));
