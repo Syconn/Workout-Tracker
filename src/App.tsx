@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { AuthContext, LoginMenu, SignupMenu } from './pages/Users';
+import { AuthContext, SignupMenu } from './pages/Signin';
 import { useSetProp } from './utils/Util';
 import './App.css'
 
@@ -8,7 +8,6 @@ function App() {
     const stored = localStorage.getItem("authContext");
     return stored ? JSON.parse(stored) : { name: "", username: "", password: "", email: "" };
   });
-
   const [page, setPage] = useState(authContext.name.length == 0 ? "login" : "home");
 
   useEffect(() => {
@@ -19,19 +18,11 @@ function App() {
 
   return (
     <>
-      {page == "home" && <Home />}
-      {page == "login" && <LoginMenu setPage={setPage} />}
+      <button onClick={() => setPage("home")}>Home</button>
+      <button onClick={() => setPage("login")}>Login</button>
       {page == "signup" && <SignupMenu setPage={setPage} setAuth={setAuth} />}
     </>
   )
-}
-
-function Home() {
-  return (
-    <>
-    Home
-    </>
-  );
 }
 
 export default App
