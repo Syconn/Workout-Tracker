@@ -1,13 +1,11 @@
 import { useState } from "react";
+import { PageProps } from "../App";
 
-type UserProps = {
-    setPage: (auth: string) => void;
+type UserProps = PageProps & {
     setAuth: <K extends keyof AuthContext>(key: K, value: AuthContext[K]) => void;
 };
 
 export interface AuthContext {
-    username: string,
-    password: string,
     name: string,
     email: string;
 }
@@ -18,18 +16,27 @@ export function SignupMenu({ setPage, setAuth }: UserProps) {
     const [error, setError] = useState("");
 
     const handleSignup = () => {
-        
+        if (name == "") {
+            setError("Missing Name");
+            return;
+        } else if (email == "") {
+            setError("Missing Email");
+            return;
+        }
+        setAuth("name", name);
+        setAuth("email", email);
+        setPage("home");
     }
 
     return (
         <>
-        Signup Screen
+        Signup Menu
         <div />
             Name: 
-            <input type="text" value={name} onChange={e => setName(e.target.value)} />
+            <input type="text" id="name" value={name} onChange={e => setName(e.target.value)} />
         <div />
             Email: 
-            <input type="text" value={email} onChange={e => setEmail(e.target.value)} />
+            <input type="text" id="email" value={email} onChange={e => setEmail(e.target.value)} />
         <div />
             <input type="button" value={"Sign Up"} onClick={handleSignup} />
         <div />

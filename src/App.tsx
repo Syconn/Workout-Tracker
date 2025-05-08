@@ -2,27 +2,32 @@ import { useEffect, useState } from 'react'
 import { AuthContext, SignupMenu } from './pages/Signin';
 import { useSetProp } from './utils/Util';
 import './App.css'
+import HomeMenu from './pages/Home';
+import WorkoutTrackerMenu from './pages/Workouts';
+
+export type PageProps = {
+	setPage: (auth: string) => void;
+}
 
 function App() {
-  const [authContext, setAuthContext] = useState<AuthContext>(() => {
-    const stored = localStorage.getItem("authContext");
-    return stored ? JSON.parse(stored) : { name: "", username: "", password: "", email: "" };
-  });
-  const [page, setPage] = useState(authContext.name.length == 0 ? "login" : "home");
+	const [authContext, setAuthContext] = useState<AuthContext>(() => {
+		const stored = localStorage.getItem("authContext");
+		return stored ? JSON.parse(stored) : { name: "", email: "" };
+	});
+	const setAuth = useSetProp(setAuthContext);
+	const [page, setPage] = useState(authContext.name.length == 0 ? "signup" : "home");
 
-  useEffect(() => {
-    localStorage.setItem("authContext", JSON.stringify(authContext));
-  }, [authContext]);
+	useEffect(() => {
+		localStorage.setItem("authContext", JSON.stringify(authContext));
+	}, [authContext]);
 
-  const setAuth = useSetProp(setAuthContext);
-
-  return (
-    <>
-      <button onClick={() => setPage("home")}>Home</button>
-      <button onClick={() => setPage("login")}>Login</button>
-      {page == "signup" && <SignupMenu setPage={setPage} setAuth={setAuth} />}
-    </>
-  )
+	return (
+		<>
+		{page == "home" && <HomeMenu setPage={setPage} auth={authContext} />}
+		{page == "signup" && <SignupMenu setPage={setPage} setAuth={setAuth} />}
+		{page == "track" && <WorkoutTrackerMenu />}
+		</>
+  	)
 }
 
 export default App
