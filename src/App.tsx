@@ -3,7 +3,7 @@ import { AuthContext, SignupMenu } from './pages/Signin';
 import { useSetProp } from './utils/Util';
 import './App.css'
 import HomeMenu from './pages/Home';
-import WorkoutTrackerMenu from './pages/Workouts';
+import { WorkoutTrackerMenu } from './pages/Workouts';
 
 export type PageProps = {
 	setPage: (auth: string) => void;
