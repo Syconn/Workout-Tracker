@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { PageProps } from "../App";
+import { WorkoutData } from "./Workouts";
 
 type UserProps = PageProps & {
     setAuth: <K extends keyof AuthContext>(key: K, value: AuthContext[K]) => void;
@@ -8,6 +9,7 @@ type UserProps = PageProps & {
 export interface AuthContext {
     name: string,
     email: string;
+    data: WorkoutData;
 }
 
 export function SignupMenu({ setPage, setAuth }: UserProps) {

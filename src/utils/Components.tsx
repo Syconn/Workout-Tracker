@@ -1,9 +1,9 @@
 export function EditableDropDown({ workouts } : { workouts: string[] }) {
     return (
         <>
-        <input type="text" name="product" list="productName" />
+        <input type="text" list="workoutNames" />
         <datalist id="workoutNames">
-        {workouts.map((val, ind) => (<option key={ind} value={val}/>))}
+            {workouts.map((val, ind) => (<option key={ind} value={val}/>))}
         </datalist>
         </>
     );
