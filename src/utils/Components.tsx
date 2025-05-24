@@ -1,30 +1,33 @@
 import { Reps, Workout } from "../pages/Workouts";
 
-export function EditableDropDown({ workouts }: { workouts: string[] }) {
+export function EditableDropDown({ workouts, value, setChange }: { workouts: string[], value: string, setChange: (s: string) => void }) {
     return (
         <>
-        <input type="text" list="workoutNames" />
+        <input type="text" list="workoutNames" value={value} onChange={v => setChange(v.target.value)}/>
         <datalist id="workoutNames">
-            {workouts.map((val, ind) => (<option key={ind} value={val} />))}
+            {workouts.map((val, ind) => (<option key={ind} value={val}/>))}
         </datalist>
         </>
     );
 }
 
-export function WorkoutsList({ workouts }: { workouts: Workout[] }) {
+export function WorkoutsList({ workouts, title }: { workouts: Workout[], title: string }) {
     return (
         <>
-        {workouts.map(v => (<WorkoutList workout={v} />))}
+        <dl>
+            {title}
+            {workouts.map(v => (<WorkoutList workout={v}/>))}
+        </dl>
         </>
     );
 }
 
 function WorkoutList({ workout }: { workout: Workout }) {
     return (
-        <dl>
-            <dt>{workout.name}</dt>
-            {workout.reps.map(v => (<dd>{generateRep(v)}</dd>))}
-        </dl>
+        <>
+        <dt>{workout.name + ":"}</dt>
+        {workout.reps.map(v => (<dd>{generateRep(v)}</dd>))}
+        </>
     );
 }
 

@@ -1,32 +1,32 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { AuthContext, SignupMenu } from './pages/Signin';
-import { useSetProp } from './utils/Util';
-import './App.css'
-import HomeMenu from './pages/Home';
 import { WorkoutData, WorkoutTrackerMenu } from './pages/Workouts';
+import HomeMenu from './pages/Home';
+import './App.css'
+import { useTypeState } from './utils/Util';
 
 export type PageProps = {
 	setPage: (auth: string) => void;
 }
 
 function App() {
-	const [authContext, setAuthContext] = useState<AuthContext>(() => {
+	const [authContext, setAuthContext] = useTypeState<AuthContext>(() => {
 		const stored = localStorage.getItem("authContext");
-		return stored ? JSON.parse(stored) : { name: "", email: "" };
+		return stored ? JSON.parse(stored) : { name: "", email: "", data: {lifts: [], lastWorkoutOfType: []} };
 	});
 	const [page, setPage] = useState(authContext.name.length == 0 ? "signup" : "home");
-	const setAuth = useSetProp(setAuthContext);
-	const [workoutData, modifyWorkoutData] = useState<WorkoutData>(authContext.data);
-	const setWorkoutData = useSetProp(modifyWorkoutData);
+	const [workoutData, setWorkoutData] = useTypeState<WorkoutData>(authContext.data);
 
 	useEffect(() => localStorage.setItem("authContext", JSON.stringify(authContext)), [authContext]);
-	useEffect(() => setAuth("data", workoutData), [setAuth, workoutData]);
+	useEffect(() => setAuthContext("data", workoutData), [setAuthContext, workoutData]);
 
 	return (
 		<>
-		{page == "home" && <HomeMenu setPage={setPage} auth={authContext} />}
+		{/* {page == "home" && <HomeMenu setPage={setPage} auth={authContext} />}
 		{page == "signup" && <SignupMenu setPage={setPage} setAuth={setAuth} />}
-		{page == "track" && <WorkoutTrackerMenu workoutData={workoutData} modifyWorkoutData={setWorkoutData} />}
+		{page == "track" && <WorkoutTrackerMenu workoutData={workoutData} modifyWorkoutData={setWorkoutData} />} */}
+
+		<WorkoutTrackerMenu workoutData={workoutData} modifyWorkoutData={setWorkoutData} />
 		</>
   	)
 }

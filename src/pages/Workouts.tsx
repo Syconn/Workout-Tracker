@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useArrayState, useSetProp } from "../utils/Util";
+import { capitalize, useArrayState, useTypeState } from "../utils/Util";
 import { EditableDropDown, WorkoutsList } from "../utils/Components";
 
 export type Reps = {
@@ -21,7 +21,7 @@ export type LiftSession = {
 
 export type WorkoutData = {
     lifts: LiftSession[];
-    lastWorkoutOfType: Workout[]; // Tracks the last Workout of each
+    lastWorkoutOfType: Workout[];
 }
 
 type WorkoutDataProp = {
@@ -30,12 +30,11 @@ type WorkoutDataProp = {
 }
 
 export function WorkoutTrackerMenu({ workoutData, modifyWorkoutData }: WorkoutDataProp) {
-    const [liftSession, setLiftSession] = useState<LiftSession>(() => {
+    const [liftSession, setLiftSession] = useTypeState<LiftSession>(() => {
         const stored = localStorage.getItem("liftSession");
-        return stored ? JSON.parse(stored) : { date: "", program: "", workouts: [] };
+        return stored ? JSON.parse(stored) : {date: "", program: "", workouts: []};
     });
-    const [active, setActive] = useState(liftSession.workouts.length != 0);
-    const setLift = useSetProp(setLiftSession);
+    const [active, setActive] = useState(true); // liftSession.workouts.length != 0
 
     useEffect(() => {
         localStorage.setItem("liftSession", JSON.stringify(liftSession));
@@ -55,7 +54,7 @@ export function WorkoutTrackerMenu({ workoutData, modifyWorkoutData }: WorkoutDa
 
 function SetupWorkoutTracker({ setup } : { setup: (date: string, program: string) => void }) {
     const [date, setDate] = useState(new Date().toISOString().substring(0, 10));
-    const [program, setProgram] = useState("")
+    const [program, setProgram] = useState("");
 
     return (
         <>
@@ -69,20 +68,36 @@ function SetupWorkoutTracker({ setup } : { setup: (date: string, program: string
 }
 
 function WorkoutTracker({ workoutData, modifyWorkoutData }: WorkoutDataProp) {
-    const testWorkout: Workout[] = [{"name": "benchpress", "reps": [{"reps": 6, "weight": 125, "superset": null}]}]
-
-    const [workouts, addWorkout, removeWorkout] = useArrayState<Workout>(() => { // MAKE SURE TO CLEAR WORKOUT WHEN ADDING TO MEM
+    const testWorkout: Workout[] = [{"name": "Bench Press", "reps": [{"reps": 6, "weight": 125, "superset": null}]}, {"name": "bicep Curl", "reps": [{"reps": 6, "weight": 25, "superset": null}]}]
+    const [active, setActive] = useState(false);
+    const [count, setCount] = useState(1);
+    const [workout, setWorkout] = useTypeState<Workout>({name: "", reps: []});
+    const [workouts, addWorkouts, removeWorkouts] = useArrayState<Workout>(() => { // MAKE SURE TO CLEAR WORKOUT WHEN ADDING TO MEM
         const stored = localStorage.getItem("workouts");
         return stored ? JSON.parse(stored) as Workout[] : [];
     });
-    useEffect(() => localStorage.setItem("workouts", JSON.stringify(workouts)), [workouts]);        
+
+    useEffect(() => localStorage.setItem("workouts", JSON.stringify(workouts)), [workouts]);     
 
     return (
         <>
-        <EditableDropDown workouts={workoutData.lastWorkoutOfType.map(v => v.name)}/>
-        <div></div>
-        Session Exercises:
-        <WorkoutsList workouts={testWorkout} />
+        {!active && (
+            <>
+            <EditableDropDown workouts={workoutData.lastWorkoutOfType.map(v => capitalize(v.name))} value={workout?.name} setChange={v => setWorkout("name", v)}/>
+            <input type="button" value={"Set Workout"} onClick={() => workout.name.length && setActive(true)}/>
+            </>
+        )}
+        {active && (
+            <>
+            <label>{workout.name}</label>
+            {Array.from({length: count}).map(v => (
+                <>
+                </>
+            ))}
+            </>
+        )}
+        <div/>
+        <WorkoutsList workouts={testWorkout} title={"Session Exercises:"}/>
         </>
     );
 }
