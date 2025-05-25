@@ -1,9 +1,13 @@
 import { useEffect, useState } from 'react'
 import { AuthContext, SignupMenu } from './pages/Signin';
-import { WorkoutData, WorkoutTrackerMenu } from './pages/Workouts';
+import { WorkoutTrackerMenu } from './pages/Workouts';
 import HomeMenu from './pages/Home';
 import './App.css'
 import { useTypeState } from './utils/Util';
+
+export type Page = {
+	page: string;
+}
 
 export type PageProps = {
 	setPage: (auth: string) => void;
@@ -14,19 +18,19 @@ function App() {
 		const stored = localStorage.getItem("authContext");
 		return stored ? JSON.parse(stored) : { name: "", email: "", data: {lifts: [], lastWorkoutOfType: []} };
 	});
-	const [page, setPage] = useState(authContext.name.length == 0 ? "signup" : "home");
-	const [workoutData, setWorkoutData] = useTypeState<WorkoutData>(authContext.data);
+	const [page, setPage] = useTypeState<Page>(() => {
+		const stored = localStorage.getItem("page");
+		return stored ? JSON.parse(stored) : { "page": authContext.name.length == 0 ? "signup" : "home"};
+	});
 
 	useEffect(() => localStorage.setItem("authContext", JSON.stringify(authContext)), [authContext]);
-	useEffect(() => setAuthContext("data", workoutData), [setAuthContext, workoutData]);
+	useEffect(() => localStorage.setItem("page", JSON.stringify(page)), [page]);
 
 	return (
 		<>
-		{/* {page == "home" && <HomeMenu setPage={setPage} auth={authContext} />}
-		{page == "signup" && <SignupMenu setPage={setPage} setAuth={setAuth} />}
-		{page == "track" && <WorkoutTrackerMenu workoutData={workoutData} modifyWorkoutData={setWorkoutData} />} */}
-
-		<WorkoutTrackerMenu workoutData={workoutData} modifyWorkoutData={setWorkoutData} />
+		{page.page == "home" && <HomeMenu setPage={p => setPage("page", p)} auth={authContext} workoutData={authContext.data} />}
+		{page.page == "signup" && <SignupMenu setPage={p => setPage("page", p)} setAuth={setAuthContext} />}
+		{page.page == "track" && <WorkoutTrackerMenu setPage={p => setPage("page", p)} workoutData={authContext.data} modifyWorkoutData={setAuthContext} />}
 		</>
   	)
 }

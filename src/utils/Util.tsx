@@ -25,13 +25,17 @@ export function useAddArrayState<T>(val: T[] | (() => T[])): [T[], (add: T) => v
     return [get, add, remove];
 }
 
-export function useDynamicState<T>(val: T[] | (() => T[])): [T[], (i: number, v: T) => void, (i: T | T[]) => void, (amount: number) => void]{
+export function useDynamicState<T>(val: T[] | (() => T[])): [T[], (i: number, v: T) => void, (v: T[]) => void, (i: T | T[]) => void, (amount: number) => void]{
     const [inputs, setInputs] = useState(val);
 
     const inputChange = (index: number, value: T) => {
         const newInputs = [...inputs];
         newInputs[index] = value;
         setInputs(newInputs);
+    };
+
+    const changeAll = (value: T[]) => {
+        setInputs(value);
     };
     
     const addInput = (input: T | T[]) => {
@@ -40,10 +44,10 @@ export function useDynamicState<T>(val: T[] | (() => T[])): [T[], (i: number, v:
     };
 
     const removeInput = (amount: number) => {
-        setInputs((prev) => prev.slice(0, Math.max(0, prev.length - 2)));
+        setInputs((prev) => prev.slice(0, Math.max(0, prev.length - amount)));
     }
 
-    return [inputs, inputChange, addInput, removeInput];
+    return [inputs, inputChange, changeAll, addInput, removeInput];
 }
 
 export function capitalize(s: string): string {

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { capitalize, useArrayState, useTypeState } from "../utils/Util";
-import { EditableDropDown, WorkoutsList } from "../utils/Components";
+import { capitalize, useAddArrayState, useDynamicState, useTypeState } from "../utils/Util";
+import { combinePriority, EditableDropDown, WorkoutsList } from "../utils/Components";
+import React from "react";
+import { AuthContext } from "./Signin";
 
 export type Reps = {
     weight: number;
     reps: number;
-    superset: Reps | null;
 }
 
 export type Workout = {
@@ -25,29 +26,45 @@ export type WorkoutData = {
 }
 
 type WorkoutDataProp = {
+    setPage: (p: string) => void;
     workoutData: WorkoutData;
-    modifyWorkoutData: <K extends keyof WorkoutData>(key: K, value: WorkoutData[K]) => void;
+    modifyWorkoutData: <K extends keyof AuthContext>(key: K, value: AuthContext[K]) => void;
 }
 
-export function WorkoutTrackerMenu({ workoutData, modifyWorkoutData }: WorkoutDataProp) {
+type WorkoutDataProp2 = {
+    workoutData: WorkoutData;
+    modifyWorkoutData: (w: Workout[]) => void;
+}
+
+export function WorkoutTrackerMenu({ setPage, workoutData, modifyWorkoutData }: WorkoutDataProp) {
     const [liftSession, setLiftSession] = useTypeState<LiftSession>(() => {
         const stored = localStorage.getItem("liftSession");
         return stored ? JSON.parse(stored) : {date: "", program: "", workouts: []};
     });
-    const [active, setActive] = useState(true); // liftSession.workouts.length != 0
+    const [active, setActive] = useState(liftSession.date != "");
 
     useEffect(() => {
         localStorage.setItem("liftSession", JSON.stringify(liftSession));
     }, [liftSession]);
 
     const setup = (date: string, program: string) => {
+        setLiftSession("date", date);
+        setLiftSession("program", program);
         setActive(true);
+    }
+
+    const workout = (workout: Workout[]) => {
+        setActive(false);
+        if (workout.length >= 1)
+            modifyWorkoutData("data", {"lifts": [...workoutData.lifts, {"date": liftSession.date, "program": liftSession.program, "workouts": workout}], "lastWorkoutOfType": combinePriority(workout, workoutData.lastWorkoutOfType)});
+        localStorage.removeItem("liftSession");
+        setPage("home");
     }
 
     return (
         <>
         {!active && <SetupWorkoutTracker setup={setup}/>}
-        {active && <WorkoutTracker workoutData={workoutData} modifyWorkoutData={modifyWorkoutData}/>}
+        {active && <WorkoutTracker workoutData={workoutData} modifyWorkoutData={workout}/>}
         </>
     );
 }
@@ -67,37 +84,77 @@ function SetupWorkoutTracker({ setup } : { setup: (date: string, program: string
     );
 }
 
-function WorkoutTracker({ workoutData, modifyWorkoutData }: WorkoutDataProp) {
-    const testWorkout: Workout[] = [{"name": "Bench Press", "reps": [{"reps": 6, "weight": 125, "superset": null}]}, {"name": "bicep Curl", "reps": [{"reps": 6, "weight": 25, "superset": null}]}]
+function WorkoutTracker({ workoutData, modifyWorkoutData }: WorkoutDataProp2) {
     const [active, setActive] = useState(false);
-    const [count, setCount] = useState(1);
-    const [workout, setWorkout] = useTypeState<Workout>({name: "", reps: []});
-    const [workouts, addWorkouts, removeWorkouts] = useArrayState<Workout>(() => { // MAKE SURE TO CLEAR WORKOUT WHEN ADDING TO MEM
+    const [name, setName] = useState("");
+    const [liftData, changeLiftData, changeAll, addInput, removeInput] = useDynamicState(["", ""]);
+    const [workouts, addWorkouts, removeWorkout] = useAddArrayState<Workout>(() => {
         const stored = localStorage.getItem("workouts");
         return stored ? JSON.parse(stored) as Workout[] : [];
     });
 
-    useEffect(() => localStorage.setItem("workouts", JSON.stringify(workouts)), [workouts]);     
+    useEffect(() => localStorage.setItem("workouts", JSON.stringify(workouts)), [workouts]);
+    
+    const finalize = (clear: boolean) => {
+        if (!clear) {
+            const reps: Reps[] = [];
+            for (let i = 0; i < liftData.length / 2; i++) {
+                if (liftData[i * 2].length > 0 && liftData[i * 2 + 1].length > 0) reps[i] = {"weight": parseInt(liftData[i * 2]), "reps": parseInt(liftData[i * 2 + 1])}
+            }
+            addWorkouts({"name": name, "reps": reps});
+        }
+        changeAll(["", ""]);
+        setName("");
+        setActive(false);
+    }
+
+    const finish = () => {
+        localStorage.removeItem("workouts");
+        modifyWorkoutData(workouts);
+    }
 
     return (
         <>
         {!active && (
             <>
-            <EditableDropDown workouts={workoutData.lastWorkoutOfType.map(v => capitalize(v.name))} value={workout?.name} setChange={v => setWorkout("name", v)}/>
-            <input type="button" value={"Set Workout"} onClick={() => workout.name.length && setActive(true)}/>
+            <EditableDropDown workouts={combinePriority(workouts, workoutData.lastWorkoutOfType).map(v => capitalize(v.name))} value={capitalize(name)} setChange={v => setName(capitalize(v))}/>
+            <input type="button" value={"Set Workout"} onClick={() => {
+                if (name.length) {
+                    const same = workouts.filter(v => v.name === name);
+                    setActive(true);
+                    if (same.length > 0) {
+                        changeAll(same[0].reps.flatMap(({weight, reps}) => [weight.toString(), reps.toString()]));
+                        removeWorkout(same[0]);
+                    }
+                }
+            }}/>
             </>
         )}
         {active && (
             <>
-            <label>{workout.name}</label>
-            {Array.from({length: count}).map(v => (
-                <>
-                </>
+            <label>{name}</label>
+            {liftData.slice(0, liftData.length / 2).map((_v, i) => (
+                <React.Fragment key={i}>
+                    <br/>
+                    <label>Weight: </label>
+                    <input type="number" min={0} value={liftData[i * 2]} onChange={v => changeLiftData(i * 2, v.target.value)}/>
+                    <label> Reps: </label>
+                    <input type="number" min={0} value={liftData[i * 2 + 1]} onChange={v => changeLiftData(i * 2 + 1, v.target.value)}/>
+                    {i != 0 && i == liftData.length / 2 - 1 && <button onClick={() => removeInput(2)}>Remove Set</button>}
+                </React.Fragment>
             ))}
+            <br/>
+            <button onClick={() => addInput(["", ""])}>Add Set</button>
+            <button onClick={() => finalize(false)}>Finished Set</button>
+            <button onClick={() => finalize(true)}>Cancel Set</button>
+            <br/>
+            <WorkoutsList workouts={workoutData.lastWorkoutOfType.filter(v => v.name === name)} title={"Last Time You Did This"}/>
             </>
         )}
         <div/>
-        <WorkoutsList workouts={testWorkout} title={"Session Exercises:"}/>
+            <WorkoutsList workouts={workouts} title={"Session Exercises:"}/>
+        <div/>
+            <button onClick={finish}>Finish Workout</button>
         </>
     );
 }

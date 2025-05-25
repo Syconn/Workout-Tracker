@@ -26,13 +26,16 @@ function WorkoutList({ workout }: { workout: Workout }) {
     return (
         <>
         <dt>{workout.name + ":"}</dt>
-        {workout.reps.map(v => (<dd>{generateRep(v)}</dd>))}
+        {workout.reps.map((v, i) => (<dd key={i}>{generateRep(v)}</dd>))}
         </>
     );
 }
 
+export function combinePriority(arr1: Workout[], arr2: Workout[]): Workout[] {
+    return [...arr1, ...arr2.filter(v => !arr1.map(v => v.name).includes(v.name))];
+}
+
 function generateRep(rep: Reps): string {
-    let output: string = rep.weight + ": " + rep.reps;
-    if (rep.superset != null) output += " | " +  generateRep(rep.superset);
+    let output: string = rep.weight + " lbs : " + rep.reps + " reps";
     return output;
 }
