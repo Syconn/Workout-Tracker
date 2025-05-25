@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { AuthContext, SignupMenu } from './pages/Signin';
 import { WorkoutTrackerMenu } from './pages/Workouts';
 import HomeMenu from './pages/Home';
