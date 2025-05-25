@@ -11,7 +11,7 @@ export function useTypeState<T>(val: T | (() => T)): [T, <K extends keyof T>(key
     return [state, useSetProp(setState)];
 }
 
-export function useArrayState<T>(val: T[] | (() => T[])): [T[], (add: T) =>  void, (remove: T)=>void] {
+export function useAddArrayState<T>(val: T[] | (() => T[])): [T[], (add: T) => void, (remove: T) => void] {
     const [get, set] = useState(val);
 
     const add = (add: T) => {
@@ -23,6 +23,27 @@ export function useArrayState<T>(val: T[] | (() => T[])): [T[], (add: T) =>  voi
     };
 
     return [get, add, remove];
+}
+
+export function useDynamicState<T>(val: T[] | (() => T[])): [T[], (i: number, v: T) => void, (i: T | T[]) => void, (amount: number) => void]{
+    const [inputs, setInputs] = useState(val);
+
+    const inputChange = (index: number, value: T) => {
+        const newInputs = [...inputs];
+        newInputs[index] = value;
+        setInputs(newInputs);
+    };
+    
+    const addInput = (input: T | T[]) => {
+        const itemsToAdd = Array.isArray(input) ? input : [input];
+        setInputs((prev) => [...prev, ...itemsToAdd]);
+    };
+
+    const removeInput = (amount: number) => {
+        setInputs((prev) => prev.slice(0, Math.max(0, prev.length - 2)));
+    }
+
+    return [inputs, inputChange, addInput, removeInput];
 }
 
 export function capitalize(s: string): string {
