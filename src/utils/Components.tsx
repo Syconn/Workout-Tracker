@@ -15,8 +15,8 @@ export function WorkoutsList({ workouts, title }: { workouts: Workout[], title: 
     return (
         <>
         <dl>
-            {title}
-            {workouts.map(v => (<WorkoutList workout={v}/>))}
+            {workouts.length > 0 && title}
+            {workouts.map((v, i) => (<WorkoutList workout={v} key={i}/>))}
         </dl>
         </>
     );
