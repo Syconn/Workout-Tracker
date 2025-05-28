@@ -4,6 +4,7 @@ import { WorkoutTrackerMenu } from './pages/Workouts';
 import HomeMenu from './pages/Home';
 import './App.css'
 import { useTypeState } from './utils/Util';
+import { HistoryMenu } from './pages/History';
 
 export type Page = {
 	page: string;
@@ -31,6 +32,7 @@ function App() {
 		{page.page == "home" && <HomeMenu setPage={p => setPage("page", p)} auth={authContext} workoutData={authContext.data} />}
 		{page.page == "signup" && <SignupMenu setPage={p => setPage("page", p)} setAuth={setAuthContext} />}
 		{page.page == "track" && <WorkoutTrackerMenu setPage={p => setPage("page", p)} workoutData={authContext.data} modifyWorkoutData={setAuthContext} />}
+		{page.page == "history" && <HistoryMenu data={authContext.data} setPage={p => setPage("page", p)}/>}
 		</>
   	)
 }
