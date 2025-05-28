@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LiftSession, WorkoutData } from "./Workouts";
+import { WorkoutData } from "./Workouts";
 import { WorkoutsList } from "../utils/Components";
 
 export function HistoryMenu({data, setPage}: {data: WorkoutData, setPage: (s: string) => void}) {

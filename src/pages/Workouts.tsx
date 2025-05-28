@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { capitalize, useAddArrayState, useDynamicState, useTypeState } from "../utils/Util";
 import { AutoWidthInput, combinePriority, EditableDropDown, WorkoutsList } from "../utils/Components";
 import React from "react";
