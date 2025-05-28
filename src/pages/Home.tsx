@@ -13,7 +13,8 @@ function HomeMenu({ setPage, auth, workoutData }: Props) {
         <>
         Hello, {auth.name}
         <div></div>
-        <button onClick={() => setPage("track")}>Track Workout</button>
+        <button onClick={() => setPage("track")}>Track A Workout</button>
+        <button onClick={() => setPage("history")}>History</button>
         <div></div>
         <WorkoutsList workouts={workoutData.lastWorkoutOfType} title={"Last Exercises:"}/>
         </>

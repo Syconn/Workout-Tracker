@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { Reps, Workout } from "../pages/Workouts";
 
 export function EditableDropDown({ workouts, value, setChange }: { workouts: string[], value: string, setChange: (s: string) => void }) {
@@ -15,7 +16,7 @@ export function WorkoutsList({ workouts, title }: { workouts: Workout[], title: 
     return (
         <>
         <dl>
-            {workouts.length > 0 && title}
+            {workouts.length > 0 && title !== "" && title}
             {workouts.map((v, i) => (<WorkoutList workout={v} key={i}/>))}
         </dl>
         </>
@@ -28,6 +29,26 @@ function WorkoutList({ workout }: { workout: Workout }) {
         <dt>{workout.name + ":"}</dt>
         {workout.reps.map((v, i) => (<dd key={i}>{generateRep(v)}</dd>))}
         </>
+    );
+}
+
+export function AutoWidthInput({note, value, setValue}: {note: string, value: string, setValue: (s: string) => void}) {
+    const spanRef = useRef<HTMLSpanElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        if (spanRef.current && inputRef.current) {
+        const spanWidth = spanRef.current.offsetWidth;
+        inputRef.current.style.width = `${spanWidth + 10}px`;
+        }
+    }, [value]);
+
+    return (
+        <div className="inline-block relative">
+        <label>{note}</label>
+        <input ref={inputRef} value={value} onChange={(e) => setValue(e.target.value)} className="border px-1 text-base" style={{ font: 'inherit' }}/>
+        <span ref={spanRef} style={{position: 'absolute', top: 0, left: 0, visibility: 'hidden', whiteSpace: 'pre', font: 'inherit'}}>{value || ' '}</span>
+        </div>
     );
 }
 
