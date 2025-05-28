@@ -6,7 +6,13 @@ export function HistoryMenu({data, setPage}: {data: WorkoutData, setPage: (s: st
     const [number, setNumber] = useState(0);
     const session = data.lifts[number];
 
-    if (data.lifts[number] == null) return <>No Tracked Workouts</>
+    if (data.lifts[number] == null) return (
+        <>
+        <button onClick={() => setPage("home")}>Home</button>
+        <div/>
+        No Tracked Workouts
+        </>
+    )
 
     return (
         <>
