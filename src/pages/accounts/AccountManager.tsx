@@ -3,7 +3,7 @@ import {User, Lock, Eye, EyeOff, Mail, Loader2} from "lucide-react";
 import styles from "./AccountManager.module.css"
 import {getRequest, postRequest} from "../../networking/WebRequests.tsx";
 import {Pages, Requests} from "../../utils/Constants.ts";
-import {Navigate, Route, Routes, Link, useNavigate} from "react-router-dom";
+import {Link, useNavigate, Outlet} from "react-router-dom";
 import {useDebounce} from "../../utils/Util.tsx";
 
 export type AccountData = {
@@ -12,14 +12,10 @@ export type AccountData = {
     accessToken: string
 }
 
-function AccountManager({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
+export function AccountManager() {
     return (
         <>
-            <Routes>
-                <Route index element={<Navigate to={Pages.LoginPage} replace />} />
-                <Route path={Pages.LoginPage} element={<LoginMenu setAccount={setAccount} />} />
-                <Route path={Pages.RegisterPage} element={<RegisterMenu setAccount={setAccount} />} /> 
-            </Routes>
+            <Outlet />
         </>
     )
 }
@@ -30,9 +26,8 @@ function AccountManager({ setAccount } : { setAccount: (v: AccountData | null) =
 //  Session storage text fields?
 //  Login Error
 //  Refresh Page Error
-//
 
-function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
+export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -48,7 +43,7 @@ function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => voi
     }
 
     return (
-        <div className={styles.background}> gay
+        <div className={styles.background}>
             <div className={styles.loginBox}>
                 <h2 className={styles.title}>Login</h2>
 
@@ -83,7 +78,7 @@ function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => voi
     )
 }
 
-function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
+export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
     const [isUsernameFocused, setIsUsernameFocused] = useState(false);
     const [validUsername, setValidUsername] = useState(false);
     const [checkingUsername, setCheckingUsername] = useState(false);
@@ -260,5 +255,3 @@ function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | null) => 
         </div>
     );
 }
-
-export default AccountManager;

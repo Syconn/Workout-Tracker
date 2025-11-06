@@ -7,7 +7,7 @@ function HomeMenu({ account }: { account: AccountData | null }) {
     const navigate = useNavigate();
 
     useEffect(() => {
-        if (account === null) navigate(`/${Pages.AccountManager}`)
+        if (account === null) navigate(`${Pages.AccountManager}`)
     }, [navigate, account]);
 
     return (

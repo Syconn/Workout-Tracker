@@ -1,6 +1,6 @@
 export const Pages = {
-    HomePage: "*",
-    AccountManager: "account",
+    HomePage: "/",
+    AccountManager: "/account",
     LoginPage: "login",
     RegisterPage: "register",
 }
