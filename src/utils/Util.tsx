@@ -1,5 +1,18 @@
-import { useCallback, useState } from "react";
+import React, {useCallback, useEffect, useState} from "react";
 
+export function useDebounce<T>(value: T, delay: number): T {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+
+    useEffect(() => {
+        const handler = setTimeout(() => setDebouncedValue(value), delay);
+        return () => clearTimeout(handler);
+    }, [value, delay]);
+
+    return debouncedValue;
+}
+
+
+// TODO WILL BE REWORKED
 function useSetProp<T>(setState: React.Dispatch<React.SetStateAction<T>>): <K extends keyof T>(key: K, value: T[K]) => void {
     return useCallback<<K extends keyof T>(key: K, value: T[K]) => void>(
       (key, value) => { setState(prev => ({...prev, [key]: value}));}, [setState]

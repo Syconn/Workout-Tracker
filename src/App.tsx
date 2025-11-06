@@ -1,40 +1,21 @@
-import { useEffect } from 'react'
-import { AuthContext, SignupMenu } from './pages/Signin';
-import { WorkoutTrackerMenu } from './pages/Workouts';
-import HomeMenu from './pages/Home';
 import './App.css'
-import { useTypeState } from './utils/Util';
-import { HistoryMenu } from './pages/History';
-
-export type Page = {
-	page: string;
-}
-
-export type PageProps = {
-	setPage: (auth: string) => void;
-}
+import {useState} from "react";
+import {Pages} from "./utils/Constants.ts";
+import HomeMenu from "./pages/Home.tsx";
+import AccountManager, {AccountData} from "./pages/accounts/AccountManager.tsx";
+import {BrowserRouter, Routes, Route} from 'react-router-dom';
 
 function App() {
-	const [authContext, setAuthContext] = useTypeState<AuthContext>(() => {
-		const stored = localStorage.getItem("authContext");
-		return stored ? JSON.parse(stored) : { name: "", email: "", data: {lifts: [], lastWorkoutOfType: []} };
-	});
-	const [page, setPage] = useTypeState<Page>(() => {
-		const stored = localStorage.getItem("page");
-		return stored ? JSON.parse(stored) : { "page": authContext.name.length == 0 ? "signup" : "home"};
-	});
-
-	useEffect(() => localStorage.setItem("authContext", JSON.stringify(authContext)), [authContext]);
-	useEffect(() => localStorage.setItem("page", JSON.stringify(page)), [page]);
+	const [account, setAccount] = useState<AccountData | null>(null);
 
 	return (
-		<>
-		{page.page == "home" && <HomeMenu setPage={p => setPage("page", p)} auth={authContext} workoutData={authContext.data} />}
-		{page.page == "signup" && <SignupMenu setPage={p => setPage("page", p)} setAuth={setAuthContext} />}
-		{page.page == "track" && <WorkoutTrackerMenu setPage={p => setPage("page", p)} workoutData={authContext.data} modifyWorkoutData={setAuthContext} />}
-		{page.page == "history" && <HistoryMenu data={authContext.data} setPage={p => setPage("page", p)}/>}
-		</>
-  	)
+		<BrowserRouter basename="/Workout-Tracker">
+			<Routes>
+				<Route path={Pages.HomePage} element={<HomeMenu account={account}/>} />
+				<Route path={`${Pages.AccountManager}/*`} element={<AccountManager setAccount={v => setAccount(v)} />} />
+			</Routes>
+		</BrowserRouter>
+	);
 }
 
 export default App

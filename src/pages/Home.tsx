@@ -1,24 +1,24 @@
-import { PageProps } from "../App";
-import { WorkoutsList } from "../utils/Components";
-import { AuthContext } from "./Signin";
-import { WorkoutData } from "./Workouts";
+import {useNavigate} from "react-router-dom";
+import {Pages} from "../utils/Constants.ts";
+import {useEffect} from "react";
+import {AccountData} from "./accounts/AccountManager.tsx";
 
-type Props = PageProps & {
-    auth: AuthContext;
-    workoutData: WorkoutData;
-};
+function HomeMenu({ account }: { account: AccountData | null }) {
+    const navigate = useNavigate();
 
-function HomeMenu({ setPage, auth, workoutData }: Props) {
+    useEffect(() => {
+        if (account === null) navigate(`/${Pages.AccountManager}`)
+    }, [navigate, account]);
+
     return (
         <>
-        Hello, {auth.name}
-        <div></div>
-        <button onClick={() => setPage("track")}>Track A Workout</button>
-        <button onClick={() => setPage("history")}>History</button>
-        <div></div>
-        <WorkoutsList workouts={workoutData.lastWorkoutOfType} title={"Last Exercises:"}/>
+            Hello {account?.name}!
+            <div />
+            Workout Tracker
+            <button>Track A Workout</button>
+            <button>History</button>
         </>
-    );
+    )
 }
 
 export default HomeMenu;

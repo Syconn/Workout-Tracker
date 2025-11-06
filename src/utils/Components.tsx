@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Reps, Workout } from "../pages/Workouts";
+import { Workout } from "../pages/Workouts";
 
 export function EditableDropDown({ workouts, value, setChange }: { workouts: string[], value: string, setChange: (s: string) => void }) {
     return (
@@ -27,7 +27,7 @@ function WorkoutList({ workout }: { workout: Workout }) {
     return (
         <>
         <dt>{workout.name + ":"}</dt>
-        {workout.reps.map((v, i) => (<dd key={i}>{generateRep(v)}</dd>))}
+        {workout.reps.map((rep, i) => (<dd key={i}>{rep.weight + " lbs : " + rep.reps + " reps"}</dd>))}
         </>
     );
 }
@@ -52,11 +52,6 @@ export function AutoWidthInput({note, value, setValue}: {note: string, value: st
     );
 }
 
-export function combinePriority(arr1: Workout[], arr2: Workout[]): Workout[] {
-    return [...arr1, ...arr2.filter(v => !arr1.map(v => v.name).includes(v.name))];
-}
-
-function generateRep(rep: Reps): string {
-    let output: string = rep.weight + " lbs : " + rep.reps + " reps";
-    return output;
-}
+// export function combinePriority(arr1: Workout[], arr2: Workout[]): Workout[] {
+//     return [...arr1, ...arr2.filter(v => !arr1.map(v => v.name).includes(v.name))];
+// }
