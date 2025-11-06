@@ -27,9 +27,10 @@ function AccountManager({ setAccount } : { setAccount: (v: AccountData | null) =
 //  Forget Password screen
 //  Remember me should save to session storage
 //  Could Database workouts
-//  API Key hide
 //  Session storage text fields?
 //  Login Error
+//  Refresh Page Error
+//
 
 function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
     const [username, setUsername] = useState("");
@@ -47,7 +48,7 @@ function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => voi
     }
 
     return (
-        <div className={styles.background}>
+        <div className={styles.background}> gay
             <div className={styles.loginBox}>
                 <h2 className={styles.title}>Login</h2>
 
