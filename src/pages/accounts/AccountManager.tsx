@@ -71,7 +71,7 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null)
 
                 <div className={styles.footer}>
                     Don't have an account?
-                    <Link to={`/${Pages.AccountManager}/${Pages.RegisterPage}`}> Register</Link>
+                    <Link to={`../${Pages.RegisterPage}`}> Register</Link>
                 </div>
             </div>
         </div>
@@ -138,7 +138,7 @@ export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | nu
         postRequest(Requests.CreateAccount, { name, email, username, password }).then((response) => {
             if (response.result) {
                 setAccount({ id: response.id, name: name, accessToken: response.token });
-                navigate(`/${Pages.HomePage}`)
+                navigate(`../../${Pages.HomePage}`)
             }
         })
     };
@@ -249,7 +249,7 @@ export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | nu
 
                 <div className={styles.footer}>
                     Already have an account?
-                    <Link to={`/${Pages.AccountManager}/${Pages.LoginPage}`}> Login</Link>
+                    <Link to={`../${Pages.LoginPage}`}> Login</Link>
                 </div>
             </div>
         </div>
