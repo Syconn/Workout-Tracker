@@ -3,6 +3,7 @@ export const Pages = {
     AccountManager: "/account",
     LoginPage: "login",
     RegisterPage: "register",
+    ForgotPage: "forgot",
 }
 
 export const Requests = {

@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from "react";
 import {User, Lock, Eye, EyeOff, Mail, Loader2} from "lucide-react";
+import { motion } from "framer-motion";
 import styles from "./AccountManager.module.css"
-import {getRequest, postRequest} from "../../networking/WebRequests.tsx";
+import {postRequest} from "../../networking/WebRequests.tsx";
 import {Pages, Requests} from "../../utils/Constants.ts";
 import {Link, useNavigate, Outlet} from "react-router-dom";
 import {useDebounce} from "../../utils/Util.tsx";
@@ -22,24 +23,36 @@ export function AccountManager() {
 // TODO
 //  Forget Password screen
 //  Remember me should save to session storage
-//  Could Database workouts
-//  Session storage text fields?
-//  Login Error
-//  Refresh Page Error
+//  Could Database workouts for temp memory
+
+export function ForgetPasswordMenu() {
+    return (
+        <div className={styles.background}>
+            <div className={styles.loginBox} >
+                <h2 className={styles.title}>Reset Password</h2>
+            </div>
+        </div>
+    )
+}
 
 export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [error, setError] = useState(false);
+    const [loggingIn, setLoggingIn] = useState(false);
 
     const navigate = useNavigate();
 
     const login = async () => {
+        setLoggingIn(true);
         const data = await postRequest(Requests.SignIn, { username, password });
         if (data.result) {
             setAccount({ id: data.id, name: data.name, accessToken: data.accessToken });
             navigate(`/${Pages.HomePage}`);
         }
+        setLoggingIn(false);
+        setError(!data.result);
     }
 
     return (
@@ -60,14 +73,29 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null)
                     </div>
                 </div>
 
+                {(error && !loggingIn) && (
+                    <div className={styles.loginError}>
+                        Incorrect Username or Password
+                    </div>
+                )}
+
                 <div className={styles.options}>
                     <label>
                         <input type="checkbox" /> Remember me
                     </label>
-                    <a href="#" onClick={() => getRequest(Requests.forgotPassword).then(data => console.log(data))} className={styles.forgot}>Forgot password?</a>
+                    <Link to={`../${Pages.ForgotPage}`} className={styles.forgot}>Forgot password?</Link>
                 </div>
 
-                <button className={styles.loginButton} onClick={() => login()}>Login</button>
+                <motion.button whileTap={{ scale: 0.85}} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
+                    className={`${styles.loginButton} ${loggingIn ? styles.loggingIn : ""}`} onClick={login} disabled={loggingIn}
+                >
+                    {loggingIn ? (
+                        <>
+                            <Loader2 className={styles.spinner} size={16} />
+                            Logging in...
+                        </>
+                    ) : ("Login")}
+                </motion.button>
 
                 <div className={styles.footer}>
                     Don't have an account?
