@@ -1,18 +1,15 @@
 import './App.css'
 import {useState} from "react";
-import {Pages} from "./utils/Constants.ts";
+import {NoAccount, Pages} from "./utils/Constants.ts";
 import HomeMenu from "./pages/Home.tsx";
-import {
-	AccountData,
-	AccountManager,
-	ForgetPasswordMenu,
-	LoginMenu,
-	RegisterMenu
-} from "./pages/accounts/AccountManager.tsx";
+import {AccountData, AccountManager, ForgetPasswordMenu, LoginMenu, RegisterMenu} from "./pages/accounts/AccountManager.tsx";
 import {Routes, Route, HashRouter, Navigate} from 'react-router-dom';
 
 function App() {
-	const [account, setAccount] = useState<AccountData | null>(null);
+	const [account, setAccount] = useState<AccountData>(() => {
+		const stored = localStorage.getItem("account");
+		return stored ? JSON.parse(stored) : NoAccount;
+	});
 
 	return (
 		<HashRouter>

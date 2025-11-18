@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from "react";
-import {User, Lock, Eye, EyeOff, Mail, Loader2} from "lucide-react";
+import {User, Lock, Eye, EyeOff, Mail, Loader2, KeyRound} from "lucide-react";
 import { motion } from "framer-motion";
 import styles from "./AccountManager.module.css"
 import {postRequest} from "../../networking/WebRequests.tsx";
@@ -15,32 +15,114 @@ export type AccountData = {
 
 export function AccountManager() {
     return (
-        <>
-            <Outlet />
-        </>
+        <Outlet />
     )
 }
+
 // TODO
-//  Forget Password screen
-//  Remember me should save to session storage
+//  Auto fill for user information for save password and username
+//  Logout System
+//  Profile System
 //  Could Database workouts for temp memory
+//  Offline Mode?
 
 export function ForgetPasswordMenu() {
+    const [sentConfirmation, setSentConfirmation] = useState<boolean>(false);
+    const [validUsername, setValidUsername] = useState<boolean>(true);
+    const [email, setEmail] = useState<string>("");
+    const [validCode, setValidCode] = useState<boolean>(true);
+    const [showPassword, setShowPassword] = useState(false);
+    const [securityCode, setSecurityCode] = useState("");
+    const [password, setPassword] = useState("");
+    const [passwordConfirm, setPasswordConfirm] = useState("");
+
+    const navigate = useNavigate();
+    const passwordsMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
+
+    const handle = async () => {
+        if (!sentConfirmation) {
+            if ((await postRequest(Requests.forgotPassword, { email })).result == "success") setSentConfirmation(true);
+            else setValidUsername(false);
+        } else if (!passwordsMismatch) {
+            if ((await postRequest(Requests.resetPassword, { email, securityCode, password })).result !== "success") setValidCode(false);
+            else navigate(`../${Pages.LoginPage}`)
+        }
+    }
+
     return (
         <div className={styles.background}>
-            <div className={styles.loginBox} >
+            <div className={styles.loginBox}>
                 <h2 className={styles.title}>Reset Password</h2>
+
+                {sentConfirmation && (
+                    <div>
+                        <div className={styles.inputGroup}>
+                            <KeyRound className={styles.icon} size={18} />
+                            <input type="text" placeholder="Code" className={styles.input}
+                                   onChange={v => setSecurityCode(v.target.value)}
+                            />
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <Lock className={styles.icon} size={18} />
+                            <input type={showPassword ? "text" : "password"} placeholder="Password" className={styles.input}
+                                   onChange={v => setPassword(v.target.value)}
+                            />
+                            <div className={styles.eyeArea} onMouseEnter={() => setShowPassword(true)}
+                                 onMouseLeave={() => setShowPassword(false)}
+                            >
+                                {showPassword ? (<Eye className={styles.eyeIcon} size={18} />) : (<EyeOff className={styles.eyeIcon} size={18} />)}
+                            </div>
+                        </div>
+
+                        <div className={styles.inputGroup}>
+                            <Lock className={styles.icon} size={18} />
+                            <input type="password" placeholder="Confirm Password" className={styles.input}
+                                   onChange={v => setPasswordConfirm(v.target.value)} />
+                        </div>
+
+                        {passwordsMismatch && (<p className={styles.errorText}>⚠ Passwords do not match.</p>)}
+                    </div>
+                )}
+
+                {!sentConfirmation && (
+                    <div>
+                        <div className={styles.inputGroup}>
+                            <Mail className={styles.icon} size={18} />
+                            <input type="email" placeholder="Email" className={styles.input}
+                                   onChange={v => setEmail(v.target.value)}
+                            />
+                        </div>
+
+                        {!validUsername && (<div className={styles.loginError}>No account connected to this email </div>)}
+                    </div>
+                )}
+
+                {!validCode && (<p className={styles.loginError}>⚠ This is not the proper security code</p>)}
+
+                <motion.button whileTap={{ scale: 0.85}} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
+                               className={styles.loginButton} onClick={handle}
+                >
+                    {!sentConfirmation ? "Confirm Email" : "Reset Password"}
+                </motion.button>
+
+                <motion.button whileTap={{ scale: 0.85}} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
+                               className={styles.loginButton} onClick={() => navigate(`../${Pages.LoginPage}`)}
+                >
+                    Cancel
+                </motion.button>
             </div>
         </div>
     )
 }
 
-export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
+export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => void }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
+    const [remeberMe, setRememberMe] = useState(false);
 
     const navigate = useNavigate();
 
@@ -49,6 +131,7 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null)
         const data = await postRequest(Requests.SignIn, { username, password });
         if (data.result) {
             setAccount({ id: data.id, name: data.name, accessToken: data.accessToken });
+            if (remeberMe) sessionStorage.setItem("account", JSON.stringify({ id: data.id, name: data.name, accessToken: data.accessToken }));
             navigate(`/${Pages.HomePage}`);
         }
         setLoggingIn(false);
@@ -73,15 +156,11 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null)
                     </div>
                 </div>
 
-                {(error && !loggingIn) && (
-                    <div className={styles.loginError}>
-                        Incorrect Username or Password
-                    </div>
-                )}
+                {(error && !loggingIn) && (<div className={styles.loginError}>Incorrect Username or Password</div>)}
 
                 <div className={styles.options}>
                     <label>
-                        <input type="checkbox" /> Remember me
+                        <input type="checkbox" onChange={() => setRememberMe(!remeberMe)} /> Remember me
                     </label>
                     <Link to={`../${Pages.ForgotPage}`} className={styles.forgot}>Forgot password?</Link>
                 </div>
@@ -106,7 +185,7 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData | null)
     )
 }
 
-export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData | null) => void }) {
+export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData) => void }) {
     const [isUsernameFocused, setIsUsernameFocused] = useState(false);
     const [validUsername, setValidUsername] = useState(false);
     const [checkingUsername, setCheckingUsername] = useState(false);
