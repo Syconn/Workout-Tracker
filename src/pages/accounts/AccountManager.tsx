@@ -122,7 +122,7 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => voi
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState(false);
     const [loggingIn, setLoggingIn] = useState(false);
-    const [remeberMe, setRememberMe] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const navigate = useNavigate();
 
@@ -130,8 +130,16 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => voi
         setLoggingIn(true);
         const data = await postRequest(Requests.SignIn, { username, password });
         if (data.result) {
-            setAccount({ id: data.id, name: data.name, accessToken: data.accessToken });
-            if (remeberMe) sessionStorage.setItem("account", JSON.stringify({ id: data.id, name: data.name, accessToken: data.accessToken }));
+            const account = { id: data.id, name: data.name, accessToken: data.token  }
+            setAccount(account);
+            if (rememberMe) {
+                localStorage.setItem("account", JSON.stringify(account));
+                sessionStorage.removeItem("account")
+            }
+            else {
+                sessionStorage.setItem("account", JSON.stringify(account));
+                localStorage.removeItem("account");
+            }
             navigate(`/${Pages.HomePage}`);
         }
         setLoggingIn(false);
@@ -143,42 +151,50 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => voi
             <div className={styles.loginBox}>
                 <h2 className={styles.title}>Login</h2>
 
-                <div className={styles.inputGroup}>
-                    <User className={styles.icon} size={18} />
-                    <input type="text" placeholder="Username" className={styles.input} onChange={e => setUsername(e.target.value)} />
-                </div>
-
-                <div className={styles.inputGroup}>
-                    <Lock className={styles.icon} size={18} />
-                    <input type={showPassword ? "text" : "password"} placeholder="Password" className={styles.input} onChange={e => setPassword(e.target.value)} />
-                    <div className={styles.eyeArea} onMouseEnter={() => setShowPassword(true)} onMouseLeave={() => setShowPassword(false)}>
-                        {showPassword ? (<Eye className={styles.eyeIcon} size={18} />) : (<EyeOff className={styles.eyeIcon} size={18} />)}
+                <div>
+                    <div className={styles.inputGroup}>
+                        <User className={styles.icon} size={18} />
+                        <input type="text" placeholder="Username" className={styles.input}
+                               autoComplete="username"
+                               onChange={e => setUsername(e.target.value)}
+                        />
                     </div>
-                </div>
 
-                {(error && !loggingIn) && (<div className={styles.loginError}>Incorrect Username or Password</div>)}
+                    <div className={styles.inputGroup}>
+                        <Lock className={styles.icon} size={18} />
+                        <input type={showPassword ? "text" : "password"} placeholder="Password" className={styles.input}
+                               autoComplete="current-password"
+                               onChange={e => setPassword(e.target.value)}
+                        />
+                        <div className={styles.eyeArea} onMouseEnter={() => setShowPassword(true)} onMouseLeave={() => setShowPassword(false)}>
+                            {showPassword ? (<Eye className={styles.eyeIcon} size={18} />) : (<EyeOff className={styles.eyeIcon} size={18} />)}
+                        </div>
+                    </div>
 
-                <div className={styles.options}>
-                    <label>
-                        <input type="checkbox" onChange={() => setRememberMe(!remeberMe)} /> Remember me
-                    </label>
-                    <Link to={`../${Pages.ForgotPage}`} className={styles.forgot}>Forgot password?</Link>
-                </div>
+                    {(error && !loggingIn) && (<div className={styles.loginError}>Incorrect Username or Password</div>)}
 
-                <motion.button whileTap={{ scale: 0.85}} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
-                    className={`${styles.loginButton} ${loggingIn ? styles.loggingIn : ""}`} onClick={login} disabled={loggingIn}
-                >
-                    {loggingIn ? (
-                        <>
-                            <Loader2 className={styles.spinner} size={16} />
-                            Logging in...
-                        </>
-                    ) : ("Login")}
-                </motion.button>
+                    <div className={styles.options}>
+                        <label>
+                            <input type="checkbox" onChange={() => setRememberMe(!rememberMe)} /> Remember me
+                        </label>
+                        <Link to={`../${Pages.ForgotPage}`} className={styles.forgot}>Forgot password?</Link>
+                    </div>
 
-                <div className={styles.footer}>
-                    Don't have an account?
-                    <Link to={`../${Pages.RegisterPage}`}> Register</Link>
+                    <motion.button whileTap={{ scale: 0.85}} whileHover={{ scale: 1.05 }} transition={{ type: "spring", stiffness: 300 }}
+                        className={`${styles.loginButton} ${loggingIn ? styles.loggingIn : ""}`} onClick={login} disabled={loggingIn}
+                    >
+                        {loggingIn ? (
+                            <>
+                                <Loader2 className={styles.spinner} size={16} />
+                                Logging in...
+                            </>
+                        ) : ("Login")}
+                    </motion.button>
+
+                    <div className={styles.footer}>
+                        Don't have an account?
+                        <Link to={`../${Pages.RegisterPage}`}> Register</Link>
+                    </div>
                 </div>
             </div>
         </div>
@@ -242,7 +258,8 @@ export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData) => 
         }
 
         setErrorField("");
-        postRequest(Requests.CreateAccount, { name, email, username, password }).then((response) => {
+        postRequest(Requests.CreateAccount, { name, email, username, password }).then(response => {
+            console.log(response);
             if (response.result) {
                 setAccount({ id: response.id, name: name, accessToken: response.token });
                 navigate(`../../${Pages.HomePage}`)
@@ -274,90 +291,98 @@ export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData) => 
         <div className={styles.background}>
             <div className={styles.loginBox}>
                 <h2 className={styles.title}>Register</h2>
-
-                <div className={styles.inputGroup}>
-                    <User className={styles.icon} size={18} />
-                    <input
-                        type="text"
-                        placeholder="Full Name"
-                        className={styles.input}
-                        onChange={handleInput("name", setName)}
-                    />
-                </div>
-                {errorField === "name" && (
-                    <p className={styles.errorText}>Please enter your name.</p>
-                )}
-
-                <div className={styles.inputGroup}>
-                    <Mail className={styles.icon} size={18} />
-                    <input
-                        type="email"
-                        placeholder="Email"
-                        className={styles.input}
-                        onChange={handleInput("email", setEmail)}
-                    />
-                </div>
-                {errorField === "email" && (<p className={styles.errorText}>Please enter a valid email.</p>)}
-                {errorField === "emailInvalid" && (<p className={styles.errorText}>Please enter a valid email address.</p>)}
-
-                <div className={styles.inputGroup}>
-                    <User className={styles.icon} size={18} />
-                    <input
-                        type="text"
-                        placeholder="Username"
-                        className={styles.input}
-                        onChange={handleInput("username", setUsername)}
-                        onFocus={() => setIsUsernameFocused(true)}
-                        onBlur={() => setIsUsernameFocused(false)}
-                    />
-                </div>
-                {checkingUsername && username.trim() && (
-                    <p className={styles.infoText}>
-                        <Loader2 className={styles.spinner} size={14} />
-                        Checking availability...
-                    </p>
-                )}
-                {(validUsername && isUsernameFocused && !checkingUsername) && (
-                    <p className={styles.successText}>✓ Username is available!</p>
-                )}
-                {(!checkingUsername && !validUsername && errorField == "usernameTaken") && (
-                    <p className={styles.errorText}>Username is already taken.</p>
-                )}
-                {errorField === "username" && (
-                    <p className={styles.errorText}>Please choose a username.</p>
-                )}
-
-                <div className={styles.inputGroup}>
-                    <Lock className={styles.icon} size={18} />
-                    <input
-                        type={showPassword ? "text" : "password"}
-                        placeholder="Password"
-                        className={styles.input}
-                        onChange={handleInput("password", setPassword)}
-                    />
-                    <div
-                        className={styles.eyeArea}
-                        onMouseEnter={() => setShowPassword(true)}
-                        onMouseLeave={() => setShowPassword(false)}
-                    >
-                        {showPassword ? (<Eye className={styles.eyeIcon} size={18} />) : (<EyeOff className={styles.eyeIcon} size={18} />)}
+                
+                <form>
+                    <div className={styles.inputGroup}>
+                        <User className={styles.icon} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Full Name"
+                            autoComplete="name"
+                            className={styles.input}
+                            onChange={handleInput("name", setName)}
+                        />
                     </div>
-                </div>
-                {errorField === "password" && (<p className={styles.errorText}>Please enter a password.</p>)}
-
-                <div className={styles.inputGroup}>
-                    <Lock className={styles.icon} size={18} />
-                    <input type="password" placeholder="Confirm Password" className={styles.input} onChange={handleInput("passwordConfirm", setPasswordConfirm)}/>
-                </div>
-                {errorField === "passwordConfirm" && (<p className={styles.errorText}>Please confirm your password.</p>)}
-                {(passwordsMismatch || errorField === "passwordMismatch") && (<p className={styles.errorText}>⚠ Passwords do not match.</p>)}
-
-                <button className={styles.loginButton} onClick={register}>Register</button>
-
-                <div className={styles.footer}>
-                    Already have an account?
-                    <Link to={`../${Pages.LoginPage}`}> Login</Link>
-                </div>
+                    {errorField === "name" && (
+                        <p className={styles.errorText}>Please enter your name.</p>
+                    )}
+    
+                    <div className={styles.inputGroup}>
+                        <Mail className={styles.icon} size={18} />
+                        <input
+                            type="email"
+                            placeholder="Email"
+                            autoComplete="email"
+                            className={styles.input}
+                            onChange={handleInput("email", setEmail)}
+                        />
+                    </div>
+                    {errorField === "email" && (<p className={styles.errorText}>Please enter a valid email.</p>)}
+                    {errorField === "emailInvalid" && (<p className={styles.errorText}>Please enter a valid email address.</p>)}
+    
+                    <div className={styles.inputGroup}>
+                        <User className={styles.icon} size={18} />
+                        <input
+                            type="text"
+                            placeholder="Username"
+                            className={styles.input}
+                            onChange={handleInput("username", setUsername)}
+                            onFocus={() => setIsUsernameFocused(true)}
+                            onBlur={() => setIsUsernameFocused(false)}
+                        />
+                    </div>
+                    {checkingUsername && username.trim() && (
+                        <p className={styles.infoText}>
+                            <Loader2 className={styles.spinner} size={14} />
+                            Checking availability...
+                        </p>
+                    )}
+                    {(validUsername && isUsernameFocused && !checkingUsername) && (
+                        <p className={styles.successText}>✓ Username is available!</p>
+                    )}
+                    {(!checkingUsername && !validUsername && errorField == "usernameTaken") && (
+                        <p className={styles.errorText}>Username is already taken.</p>
+                    )}
+                    {errorField === "username" && (
+                        <p className={styles.errorText}>Please choose a username.</p>
+                    )}
+    
+                    <div className={styles.inputGroup}>
+                        <Lock className={styles.icon} size={18} />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            placeholder="Password"
+                            autoComplete="new-password"
+                            className={styles.input}
+                            onChange={handleInput("password", setPassword)}
+                        />
+                        <div
+                            className={styles.eyeArea}
+                            onMouseEnter={() => setShowPassword(true)}
+                            onMouseLeave={() => setShowPassword(false)}
+                        >
+                            {showPassword ? (<Eye className={styles.eyeIcon} size={18} />) : (<EyeOff className={styles.eyeIcon} size={18} />)}
+                        </div>
+                    </div>
+                    {errorField === "password" && (<p className={styles.errorText}>Please enter a password.</p>)}
+    
+                    <div className={styles.inputGroup}>
+                        <Lock className={styles.icon} size={18} />
+                        <input type="password" placeholder="Confirm Password" className={styles.input}
+                               autoComplete="new-password"
+                               onChange={handleInput("passwordConfirm", setPasswordConfirm)}
+                        />
+                    </div>
+                    {errorField === "passwordConfirm" && (<p className={styles.errorText}>Please confirm your password.</p>)}
+                    {(passwordsMismatch || errorField === "passwordMismatch") && (<p className={styles.errorText}>⚠ Passwords do not match.</p>)}
+    
+                    <button className={styles.loginButton} onClick={register}>Register</button>
+    
+                    <div className={styles.footer}>
+                        Already have an account?
+                        <Link to={`../${Pages.LoginPage}`}> Login</Link>
+                    </div>
+                </form>
             </div>
         </div>
     );
