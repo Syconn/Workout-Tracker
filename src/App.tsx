@@ -8,35 +8,34 @@ import {postRequest} from "./networking/WebRequests.tsx";
 
 function App() {
 	const [account, setAccount] = useState<AccountData>(() => {
-		const local = localStorage.getItem("account");
-		const session = localStorage.getItem("account");
-		return local ? JSON.parse(local) : session ? JSON.parse(session) : NoAccount;
-	});
+		const local = localStorage.getItem("account")
+		const session = sessionStorage.getItem("account")
+		return local ? JSON.parse(local) : session ? JSON.parse(session) : NoAccount
+	})
 
-	const [offline, setOffline] = useState<boolean>(true);
+	const [offline, setOffline] = useState<boolean>(true)
 
 	useEffect(() => {
 		const handle = () => {
 			postRequest("offline").then(result => {
-				if (result?.result === "success") setOffline(false);
-				console.log(result);
-			});
+				if (result?.result === "success") setOffline(false)
+			})
 		}
 
 		handle()
 
 		if (offline) {
-			const interval = setInterval(handle, 5000);
-			return () => clearInterval(interval);
+			const interval = setInterval(handle, 5000)
+			return () => clearInterval(interval)
 		}
-		return;
+		return
 	}, [offline])
 
 	return (
 		<HashRouter>
 			<Routes>
 				<Route path={Pages.HomePage} element={<HomeMenu account={account} setAccount={setAccount} />} />
-				<Route path={Pages.AccountManager} element={<AccountManager />}>
+				<Route path={Pages.AccountManager} element={<AccountManager account={account} />}>
 					<Route index element={<Navigate to="login" replace />} />
 					<Route path={Pages.LoginPage} element={<LoginMenu setAccount={setAccount} />} />
 					<Route path={Pages.RegisterPage} element={<RegisterMenu setAccount={setAccount} />} />

@@ -1,0 +1,9 @@
+Auto fill for user information for save password and username
+
+Profile System
+- allow logout
+- customization
+- modify account data
+
+Offline Mode?
+- Could Database workouts for temp memory

@@ -3,7 +3,7 @@ import {User, Lock, Eye, EyeOff, Mail, Loader2, KeyRound} from "lucide-react";
 import { motion } from "framer-motion";
 import styles from "./AccountManager.module.css"
 import {postRequest} from "../../networking/WebRequests.tsx";
-import {Pages, Requests} from "../../utils/Constants.ts";
+import {NoAccount, Pages, Requests} from "../../utils/Constants.ts";
 import {Link, useNavigate, Outlet} from "react-router-dom";
 import {useDebounce} from "../../utils/Util.tsx";
 
@@ -13,18 +13,17 @@ export type AccountData = {
     accessToken: string
 }
 
-export function AccountManager() {
+export function AccountManager({account}: { account: AccountData }) {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (account !== NoAccount) navigate(`/${Pages.HomePage}`)
+    }, [account, navigate])
+
     return (
         <Outlet />
     )
 }
-
-// TODO
-//  Auto fill for user information for save password and username
-//  Logout System
-//  Profile System
-//  Could Database workouts for temp memory
-//  Offline Mode?
 
 export function ForgetPasswordMenu() {
     const [sentConfirmation, setSentConfirmation] = useState<boolean>(false);
@@ -132,11 +131,10 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => voi
         if (data.result) {
             const account = { id: data.id, name: data.name, accessToken: data.token  }
             setAccount(account);
-            if (rememberMe) {
+            if (!rememberMe) {
                 localStorage.setItem("account", JSON.stringify(account));
                 sessionStorage.removeItem("account")
-            }
-            else {
+            } else {
                 sessionStorage.setItem("account", JSON.stringify(account));
                 localStorage.removeItem("account");
             }
@@ -259,7 +257,6 @@ export function RegisterMenu({ setAccount } : { setAccount: (v: AccountData) => 
 
         setErrorField("");
         postRequest(Requests.CreateAccount, { name, email, username, password }).then(response => {
-            console.log(response);
             if (response.result) {
                 setAccount({ id: response.id, name: name, accessToken: response.token });
                 navigate(`../../${Pages.HomePage}`)

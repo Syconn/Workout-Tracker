@@ -27,7 +27,7 @@ function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (
                 </div>
 
                 <div className={styles.headerRight}>
-                    <div className={styles.accountIcon}>👤</div>
+                    <button onClick={() => setAccount(NoAccount)} className={styles.accountIcon}>👤</button>
                 </div>
             </header>
 
