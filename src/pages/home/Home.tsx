@@ -1,8 +1,8 @@
-import {useNavigate} from "react-router-dom";
-import {NoAccount, Pages} from "../../utils/Constants.ts";
-import {useEffect} from "react";
 import {AccountData} from "../accounts/AccountManager.tsx";
-import headerStyles from "./Header.module.css"
+import styles from "./Home.module.css";
+import {NoAccount, Pages} from "../../utils/Constants.ts";
+import {useNavigate} from "react-router-dom";
+import {useEffect} from "react";
 
 function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (v: AccountData) => void }) {
     const navigate = useNavigate();
@@ -12,15 +12,50 @@ function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (
     }, [navigate, account]);
 
     return (
-        <>
-            {/*Hello {account?.name}!*/}
-            {/*Workout Tracker*/}
-            {/*<button>Track A Workout</button>*/}
-            {/*<button>History</button>*/}
-            {/*<button>Logout</button>*/}
+        <div className={styles.page}>
+            <header className={styles.appHeader}>
+                <div className={styles.headerLeft}>
+                    <img
+                        src="icon.png"
+                        alt="Workout Tracker Logo"
+                        className={styles.logo}
+                    />
+                </div>
 
-        </>
-    )
+                <div className={styles.headerCenter}>
+                    <h1 className={styles.title}>Workout Tracker</h1>
+                </div>
+
+                <div className={styles.headerRight}>
+                    <div className={styles.accountIcon}>👤</div>
+                </div>
+            </header>
+
+            <main className={styles.homeContainer}>
+                <section className={styles.homeHeader}>
+                    <h2>
+                        Welcome back,{" "}
+                        <span className={styles.userName}>{account.name} </span> 💪
+                    </h2>
+                    <p>Ready to crush today’s workout?</p>
+                </section>
+
+                <section className={styles.homeActions}>
+                    <button className={`${styles.homeButton} ${styles.primary}`}>
+                        Start Workout
+                    </button>
+
+                    <button className={styles.homeButton}>
+                        Workout History
+                    </button>
+
+                    <button className={styles.homeButton}>
+                        Check Progress
+                    </button>
+                </section>
+            </main>
+        </div>
+    );
 }
 
 export default HomeMenu;
