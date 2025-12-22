@@ -1,0 +1,65 @@
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.45); /* darken background slightly */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(3px);
+}
+
+.offline {
+    background-color: #2b2b2b; /* dark gray box */
+    border: 3px solid #11a601; /* red border */
+    border-radius: 1rem;
+    color: white;
+    padding: 2rem 3rem;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(17, 166, 1, 0.6); /* outer red glow */
+    max-width: 420px;
+    animation: slideDown 0.35s ease-out;
+}
+
+.offline {
+    animation: fadeIn 0.3s ease-in-out, pulse 2.5s infinite;
+}
+
+.icon {
+    color: #ff4d4d;
+    margin-bottom: 1rem;
+    filter: drop-shadow(0 0 6px rgba(255, 77, 77, 0.8)); /* glowing icon shadow */
+}
+
+.gh {
+    margin: 0.5rem 0;
+    text-shadow:
+            0 0 6px rgba(17, 166, 1, 0.8),
+            0 0 12px rgba(17, 166, 1, 0.5); /* red glow around title */
+}
+
+.gp {
+    margin: 0;
+    opacity: 0.9;
+    text-shadow: 0 0 4px rgba(17, 166, 1, 0.6), 0 0 10px rgba(17, 166, 1, 0.4); /* softer text glow */
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 20px rgba(17,166,1,0.4); }
+    50% { box-shadow: 0 0 35px rgba(17,166,1,0.8); }
+    100% { box-shadow: 0 0 20px rgba(17,166,1,0.4); }
+}
