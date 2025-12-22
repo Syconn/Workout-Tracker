@@ -13,8 +13,11 @@ export const Requests = {
     CreateAccount: "createAccount",
     ValidateUsername: "validateUsername",
     SignIn: "signIn",
-    forgotPassword: "forgotPassword",
-    resetPassword: "resetPassword",
+    ForgotPassword: "forgotPassword",
+    ResetPassword: "resetPassword",
+    Form: "form",
+    ValidSession: "validSession",
+    ModifyForm: "modifyForm"
 }
 
 export const NoAccount: AccountData = {

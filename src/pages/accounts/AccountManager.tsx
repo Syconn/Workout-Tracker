@@ -40,10 +40,10 @@ export function ForgetPasswordMenu() {
 
     const handle = async () => {
         if (!sentConfirmation) {
-            if ((await postRequest(Requests.forgotPassword, { email })).result == "success") setSentConfirmation(true);
+            if ((await postRequest(Requests.ForgotPassword, { email })).result == "success") setSentConfirmation(true);
             else setValidUsername(false);
         } else if (!passwordsMismatch) {
-            if ((await postRequest(Requests.resetPassword, { email, securityCode, password })).result !== "success") setValidCode(false);
+            if ((await postRequest(Requests.ResetPassword, { email, securityCode, password })).result !== "success") setValidCode(false);
             else navigate(`../${Pages.LoginPage}`)
         }
     }

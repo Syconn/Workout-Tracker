@@ -1,5 +1,5 @@
 import './App.css'
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {NoAccount, Pages} from "./utils/Constants.ts";
 import HomeMenu from "./pages/home/Home.tsx";
 import {
@@ -12,6 +12,7 @@ import {
 import {HashRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {OfflinePopup} from "./utils/Popups.tsx";
 import {Profile} from "./pages/profile/Profile.tsx";
+import {logout, validateSession} from "./utils/Util.tsx";
 
 function App() {
 	const [account, setAccount] = useState<AccountData>(() => {
@@ -19,6 +20,25 @@ function App() {
 		const session = sessionStorage.getItem("account")
 		return local ? JSON.parse(local) : session ? JSON.parse(session) : NoAccount
 	})
+
+	useEffect(() => {
+		if (account === NoAccount) return;
+
+		let cancelled = false;
+
+		(async () => {
+			const validated = await validateSession(account);
+			if (!cancelled) {
+				setAccount(validated);
+				if (validated === NoAccount) logout(setAccount);
+			}
+		})();
+
+		return () => {
+			cancelled = true;
+		};
+	}, [account]);
+
 
 	return (
 		<HashRouter>

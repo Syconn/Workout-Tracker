@@ -1,3 +1,5 @@
+Customize logout popups
+
 Auto fill for user information for save password and username
 
 Profile System
