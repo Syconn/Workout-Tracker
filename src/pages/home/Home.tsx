@@ -3,8 +3,9 @@ import styles from "./Home.module.css";
 import {NoAccount, Pages} from "../../utils/Constants.ts";
 import {useNavigate} from "react-router-dom";
 import {useEffect} from "react";
+import {User} from "lucide-react";
 
-function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (v: AccountData) => void }) {
+function HomeMenu({ account }: { account: AccountData }) {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -15,11 +16,7 @@ function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (
         <div className={styles.page}>
             <header className={styles.appHeader}>
                 <div className={styles.headerLeft}>
-                    <img
-                        src="icon.png"
-                        alt="Workout Tracker Logo"
-                        className={styles.logo}
-                    />
+                    <img src="icon.png" alt="Workout Tracker Logo" className={styles.logo}/>
                 </div>
 
                 <div className={styles.headerCenter}>
@@ -27,7 +24,9 @@ function HomeMenu({ account, setAccount }: { account: AccountData, setAccount: (
                 </div>
 
                 <div className={styles.headerRight}>
-                    <button onClick={() => setAccount(NoAccount)} className={styles.accountIcon}>👤</button>
+                    <button onClick={() => navigate(Pages.ProfilePage)} className={styles.accountIcon}>
+                        <User size={20} color="#f5f5f5" strokeWidth={2} />
+                    </button>
                 </div>
             </header>
 

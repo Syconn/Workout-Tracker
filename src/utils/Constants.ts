@@ -2,6 +2,7 @@ import {AccountData} from "../pages/accounts/AccountManager.tsx";
 
 export const Pages = {
     HomePage: "/",
+    ProfilePage: "/profile",
     AccountManager: "/account",
     LoginPage: "login",
     RegisterPage: "register",

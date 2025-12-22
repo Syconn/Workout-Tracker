@@ -1,5 +1,17 @@
 import {useEffect, useState} from "react";
 import {postRequest} from "../networking/WebRequests.tsx";
+import {AccountData} from "../pages/accounts/AccountManager.tsx";
+import {NoAccount} from "./Constants.ts";
+
+export function logout(setAccount: (v: AccountData) => void)  {
+    if (!confirm("Are you sure you want to log out?")) return;
+
+    setAccount(NoAccount);
+    localStorage.removeItem("account")
+    sessionStorage.removeItem("account")
+
+    alert("You have been logged out") // Temp
+}
 
 export function useDebounce<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -13,7 +25,7 @@ export function useDebounce<T>(value: T, delay: number): T {
 }
 
 export function useOnlineStatus() {
-    const [offline, setOffline] = useState<boolean>(true)
+    const [offline, setOffline] = useState<boolean>(false)
 
     useEffect(() => {
         const handle = () => {

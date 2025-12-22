@@ -1,0 +1,95 @@
+.profileContainer {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+}
+
+.card {
+    width: 100%;
+    max-width: 380px;
+    background: rgba(17, 24, 39, 0.85);
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    color: white;
+}
+
+.heading {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+
+.field {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+.field label {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-bottom: 0.25rem;
+}
+
+.field input {
+    padding: 0.7rem;
+    border-radius: 10px;
+    border: none;
+    background-color: #1f2937;
+    color: white;
+    font-size: 0.95rem;
+}
+
+.field input:focus {
+    outline: none;
+    background-color: #374151;
+}
+
+.saveButton {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    width: 100%;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: bold;
+    background-color: #3e995b;   /* softer green */
+    color: #000;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.saveButton:hover {
+    background-color: #2fb986;
+    transform: translateY(-2px);
+}
+
+.logoutButton {
+    margin-top: 0.75rem;
+    padding: 0.9rem;
+    width: 100%;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.95rem;
+    background-color: #862c0f;   /* muted rust */
+    color: #ffffff;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.logoutButton:hover {
+    background-color: #9a3412;
+    transform: translateY(-2px);
+}
+
+.saveButton,
+.logoutButton {
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.08);
+}

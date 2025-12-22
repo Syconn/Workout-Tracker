@@ -11,6 +11,7 @@ import {
 } from "./pages/accounts/AccountManager.tsx";
 import {HashRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {OfflinePopup} from "./utils/Popups.tsx";
+import {Profile} from "./pages/profile/Profile.tsx";
 
 function App() {
 	const [account, setAccount] = useState<AccountData>(() => {
@@ -24,7 +25,8 @@ function App() {
 			<OfflinePopup />
 
 			<Routes>
-				<Route path={Pages.HomePage} element={<HomeMenu account={account} setAccount={setAccount} />} />
+				<Route path={Pages.HomePage} element={<HomeMenu account={account} />} />
+				<Route path={Pages.ProfilePage} element={<Profile account={account} setAccount={setAccount} />} />
 				<Route path={Pages.AccountManager} element={<AccountManager account={account} />}>
 					<Route index element={<Navigate to="login" replace />} />
 					<Route path={Pages.LoginPage} element={<LoginMenu setAccount={setAccount} />} />
