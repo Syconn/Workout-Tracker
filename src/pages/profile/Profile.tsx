@@ -84,7 +84,7 @@ export function Profile({ account, setAccount }: { account: AccountData, setAcco
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
+                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo} />
                 </div>
 
                 <div className={homeStyles.headerCenter}>

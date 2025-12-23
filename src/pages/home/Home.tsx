@@ -40,7 +40,7 @@ function HomeMenu({ account }: { account: AccountData }) {
                 </section>
 
                 <section className={styles.homeActions}>
-                    <button className={`${styles.homeButton} ${styles.primary}`}>
+                    <button onClick={() => navigate(Pages.TrackerPage)} className={`${styles.homeButton} ${styles.primary}`}>
                         Start Workout
                     </button>
 

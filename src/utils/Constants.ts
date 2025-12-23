@@ -4,6 +4,7 @@ export const Pages = {
     HomePage: "/",
     ProfilePage: "/profile",
     AccountManager: "/account",
+    TrackerPage: "/tracker",
     LoginPage: "login",
     RegisterPage: "register",
     ForgotPage: "forgot",

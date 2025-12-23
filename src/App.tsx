@@ -13,6 +13,7 @@ import {HashRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {OfflinePopup} from "./utils/Popups.tsx";
 import {Profile} from "./pages/profile/Profile.tsx";
 import {logout, validateSession} from "./utils/Util.tsx";
+import Tracker from "./pages/tracker/Tracker.tsx";
 
 function App() {
 	const [account, setAccount] = useState<AccountData>(() => {
@@ -47,6 +48,7 @@ function App() {
 			<Routes>
 				<Route path={Pages.HomePage} element={<HomeMenu account={account} />} />
 				<Route path={Pages.ProfilePage} element={<Profile account={account} setAccount={setAccount} />} />
+				<Route path={Pages.TrackerPage} element={<Tracker />} />
 				<Route path={Pages.AccountManager} element={<AccountManager account={account} />}>
 					<Route index element={<Navigate to="login" replace />} />
 					<Route path={Pages.LoginPage} element={<LoginMenu setAccount={setAccount} />} />

@@ -1,11 +1,11 @@
 Customize logout popups
 
+Free Exercise Database with images - https://github.com/Syconn/free-exercise-db/blob/main/dist/exercises.json
+
 Auto fill for user information for save password and username
 
 Profile System
-- allow logout
-- customization
-- modify account data
+- preference system?
 
-Offline Mode?
+API Down System?
 - Could Database workouts for temp memory
