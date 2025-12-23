@@ -1,0 +1,32 @@
+.tracker {
+    padding: 1rem;
+}
+
+.search {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.exercise-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+}
+
+.exercise-card {
+    background: #111;
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.exercise-card img {
+    width: 100%;
+    border-radius: 4px;
+}
+
+path {
+    transition: fill 0.2s ease;
+    cursor: pointer;
+}

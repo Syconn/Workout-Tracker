@@ -56,3 +56,10 @@ export function useOnlineStatus() {
 
     return offline;
 }
+
+export function getExerciseImage(images: string[]) {
+    return {
+        start: `images/${images[0]}`,
+        end: `images/${images[1]}`
+    };
+}
