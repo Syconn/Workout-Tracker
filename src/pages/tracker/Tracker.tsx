@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react";
+import {Dispatch, SetStateAction, useEffect, useMemo, useState} from "react";
 import {getExerciseImage} from "../../utils/Util.tsx";
 import {Outlet, useNavigate} from "react-router-dom";
 import {NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
@@ -198,10 +198,12 @@ export function Tracker({ account }: { account: AccountData }) {
 
 export function ExerciseSearch() {
     const [query, setQuery] = useState("");
+    const [muscleCategory, setMuscleCategory] = useState("");
     const [results, setResults] = useState<ExerciseDB[]>(exerciseDB as ExerciseDB[]);
     const [filters, setFilters] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string[]>([]);
 
-    const changeMe = ["Chest", "Back", "Legs", "Dumbbell", "Barbell"];
+    const muscleCategories = ["Legs", "Push", "Pull", "Back", "Arms", "Chest", "UpperBody", "LowerBody"];
     const db = exerciseDB as ExerciseDB[];
     const fuse = useMemo(() => createFuse(db), [db]);
     const navigate = useNavigate();
@@ -239,16 +241,33 @@ export function ExerciseSearch() {
                 <div className={styles.selectorCard}>
                     <h1>Workout Tracker</h1>
 
+                    <div className={styles.categoryRow}>
+                        <span className={styles.categoryLabel}>Search Category</span>
+
+                        <select
+                            className={styles.categorySelect}
+                            value={muscleCategory}
+                            onChange={e => setMuscleCategory(e.target.value)}
+                        >
+                            <option value="">All</option>
+                            <option value="push">Push</option>
+                            <option value="pull">Pull</option>
+                            <option value="legs">Legs</option>
+                            <option value="upper">Upper</option>
+                            <option value="lower">Lower</option>
+                        </select>
+                    </div>
+
                     <div className={styles.stickySearch}>
                         <input
                             className={styles.selectorInput}
-                            placeholder="Search exercises, muscles, equipment..."
+                            placeholder="Search..."
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                         />
 
                         <div className={styles.pills}>
-                            {changeMe.map(tag => (
+                            {muscleCategories.map(tag => (
                                 <button
                                     key={tag}
                                     className={`${styles.pill} ${filters.includes(tag) ? styles.active : ""}`}
@@ -265,7 +284,7 @@ export function ExerciseSearch() {
                             rowCount={results.length}
                             rowHeight={rowHeight}
                             rowComponent={ExerciseCard}
-                            rowProps={{ results }}
+                            rowProps={{ results, selected, setSelected }}
                         />
                         {results.length === 0 && (
                             <p className={styles.noResults}>No exercises found</p>
@@ -277,13 +296,34 @@ export function ExerciseSearch() {
     )
 }
 
-function ExerciseCard({ index, results }: RowComponentProps<{ results: ExerciseDB[] }>) {
+function ExerciseCard({ index, results, selected, setSelected }: RowComponentProps<{ results: ExerciseDB[], selected: string[], setSelected: Dispatch<SetStateAction<string[]>> }>) {
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
+    const isSelected = selected.includes(exercise.name);
+
+    const toggleSelect = () => {
+        setSelected(prev => prev.includes(exercise.name) ? prev.filter(n => n !== exercise.name) : [...prev, exercise.name]);
+    };
 
     return (
-        <div className={styles.exerciseCard}>
+        <div
+            className={`${styles.exerciseCard} ${isSelected ? styles.selected : ""}`}
+            onClick={toggleSelect}
+        >
             <h3>{exercise.name}</h3>
+
+            {isSelected && (
+                <button
+                    className={styles.checkmark}
+                    onClick={e => {
+                        e.stopPropagation();
+                        toggleSelect();
+                    }}
+                    aria-label="Selected"
+                >
+                    ✓
+                </button>
+            )}
 
             <div>
                 <img src={images.start} loading="lazy" decoding="async" alt="start" width="400" height="300" />
