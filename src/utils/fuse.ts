@@ -8,7 +8,8 @@ export function createFuse(exercises: ExerciseDB[]) {
             "secondaryMuscles",
             "equipment",
             "level",
-            "category"
+            "category",
+            "id"
         ],
         threshold: 0.35, 
         ignoreLocation: true,

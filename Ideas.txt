@@ -1,5 +1,7 @@
 Customize logout popups
 
+Tracked Workouts should be saved to in local storage then get requested from the server
+
 Free Exercise Database with images - https://github.com/Syconn/free-exercise-db/blob/main/dist/exercises.json
 
 Auto fill for user information for save password and username

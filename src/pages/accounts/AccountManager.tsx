@@ -131,7 +131,7 @@ export function LoginMenu({ setAccount } : { setAccount: (v: AccountData) => voi
         if (data.result) {
             const account = { id: data.id, name: data.name, accessToken: data.token  }
             setAccount(account);
-            if (!rememberMe) {
+            if (rememberMe) {
                 localStorage.setItem("account", JSON.stringify(account));
                 sessionStorage.removeItem("account")
             } else {

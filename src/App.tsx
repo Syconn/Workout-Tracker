@@ -1,6 +1,6 @@
 import './App.css'
 import {useEffect, useState} from "react";
-import {NoAccount, Pages} from "./utils/Constants.ts";
+import {NoAccount, NoWorkout, Pages} from "./utils/Constants.ts";
 import HomeMenu from "./pages/home/Home.tsx";
 import {
 	AccountData,
@@ -12,8 +12,8 @@ import {
 import {HashRouter, Navigate, Route, Routes} from 'react-router-dom';
 import {OfflinePopup} from "./utils/Popups.tsx";
 import {Profile} from "./pages/profile/Profile.tsx";
-import {logout, validateSession} from "./utils/Util.tsx";
-import Tracker from "./pages/tracker/Tracker.tsx";
+import {logout, validateSession, useTypeState} from "./utils/Util.tsx";
+import {ExerciseSearch, Track, TrackedWorkout, Tracker, TrackerStart} from "./pages/tracker/Tracker.tsx";
 
 function App() {
 	const [account, setAccount] = useState<AccountData>(() => {
@@ -21,6 +21,15 @@ function App() {
 		const session = sessionStorage.getItem("account")
 		return local ? JSON.parse(local) : session ? JSON.parse(session) : NoAccount
 	})
+
+	const [trackedWorkout, setTrackedWorkout] = useTypeState<TrackedWorkout>(() => {
+		const local = localStorage.getItem("trackedWorkout")
+		return local ? JSON.parse(local) : NoWorkout
+	})
+
+	useEffect(() => {
+		if (trackedWorkout != NoWorkout) localStorage.setItem("trackedWorkout", JSON.stringify(trackedWorkout))
+	}, [trackedWorkout]);
 
 	useEffect(() => {
 		if (account === NoAccount) return;
@@ -48,13 +57,19 @@ function App() {
 			<Routes>
 				<Route path={Pages.HomePage} element={<HomeMenu account={account} />} />
 				<Route path={Pages.ProfilePage} element={<Profile account={account} setAccount={setAccount} />} />
-				<Route path={Pages.TrackerPage} element={<Tracker />} />
+				<Route path={Pages.TrackerPage} element={<Tracker account={account} />} >
+					<Route index element={<Navigate to={Pages.StartPage} replace />} />
+					<Route path={Pages.StartPage} element={<TrackerStart workout={trackedWorkout} setWorkout={setTrackedWorkout} />} />
+					<Route path={Pages.TrackPage} element={<Track workout={trackedWorkout} setWorkout={setTrackedWorkout} />} />
+					<Route path={Pages.SearchPage} element={<ExerciseSearch />} />
+				</Route>
 				<Route path={Pages.AccountManager} element={<AccountManager account={account} />}>
-					<Route index element={<Navigate to="login" replace />} />
+					<Route index element={<Navigate to={Pages.LoginPage} replace />} />
 					<Route path={Pages.LoginPage} element={<LoginMenu setAccount={setAccount} />} />
 					<Route path={Pages.RegisterPage} element={<RegisterMenu setAccount={setAccount} />} />
 					<Route path={Pages.ForgotPage} element={<ForgetPasswordMenu />} />
 				</Route>
+				<Route path="*" element={<Navigate to={Pages.HomePage} replace />} />
 			</Routes>
 		</HashRouter>
 	);

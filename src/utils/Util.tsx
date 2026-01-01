@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {postRequest} from "../networking/WebRequests.tsx";
 import {AccountData} from "../pages/accounts/AccountManager.tsx";
 import {NoAccount, Requests} from "./Constants.ts";
@@ -22,6 +22,17 @@ export async function validateSession(account: AccountData) {
         console.error(err);
         return NoAccount
     })
+}
+
+function useSetProp<T>(setState: React.Dispatch<React.SetStateAction<T>>): <K extends keyof T>(key: K, value: T[K]) => void {
+    return useCallback<<K extends keyof T>(key: K, value: T[K]) => void>(
+        (key, value) => { setState(prev => ({...prev, [key]: value}));}, [setState]
+    );
+}
+
+export function useTypeState<T>(val: T | (() => T)): [T, <K extends keyof T>(key: K, value: T[K]) => void] {
+    const [state, setState] = useState(val);
+    return [state, useSetProp(setState)];
 }
 
 export function useDebounce<T>(value: T, delay: number): T {
