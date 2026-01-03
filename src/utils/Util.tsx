@@ -74,3 +74,16 @@ export function getExerciseImage(images: string[]) {
         end: `images/${images[1]}`
     };
 }
+
+export function capitalize(s: string): string {
+    if (s === null) return "None"
+    let r: string = "";
+    for (let i = 0; i < s.length; i++) {
+        if (i == 0) r += s[0].toLocaleUpperCase();
+        else {
+            if (s[i - 1] == " ") r += s[i].toLocaleUpperCase();
+            else r += s[i].toLocaleLowerCase();
+        }
+    }
+    return r;
+}

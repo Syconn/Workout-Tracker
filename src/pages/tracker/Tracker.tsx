@@ -1,9 +1,9 @@
 import {Dispatch, SetStateAction, useEffect, useMemo, useState} from "react";
-import {getExerciseImage} from "../../utils/Util.tsx";
+import {capitalize, getExerciseImage} from "../../utils/Util.tsx";
 import {Outlet, useNavigate} from "react-router-dom";
 import {NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
 import {AccountData} from "../accounts/AccountManager.tsx";
-import {List, RowComponentProps, useDynamicRowHeight} from 'react-window';
+import {List, RowComponentProps} from 'react-window';
 import homeStyles from "../home/Home.module.css";
 import styles from "./Tracker.module.css";
 import exerciseDB from "../../data/exercises.json"
@@ -201,17 +201,12 @@ export function ExerciseSearch() {
     const [muscleCategory, setMuscleCategory] = useState("");
     const [results, setResults] = useState<ExerciseDB[]>(exerciseDB as ExerciseDB[]);
     const [filters, setFilters] = useState<string[]>([]);
-    const [selected, setSelected] = useState<string[]>([]);
+    const [selected, setSelected] = useState<string | null>(null);
 
     const muscleCategories = ["Legs", "Push", "Pull", "Back", "Arms", "Chest", "UpperBody", "LowerBody"];
     const db = exerciseDB as ExerciseDB[];
     const fuse = useMemo(() => createFuse(db), [db]);
     const navigate = useNavigate();
-
-    const rowHeight = useDynamicRowHeight({
-        defaultRowHeight: 500
-    });
-
 
     useEffect(() => {
         let filtered = query.trim() ? fuse.search(query).map(r => r.item) : db;
@@ -279,10 +274,18 @@ export function ExerciseSearch() {
                         </div>
                     </div>
 
+                    {results.length > 0 && (
+                        <div className={styles.resultsMeta}>
+                            Showing{" "}
+                            <strong>{results.length} </strong>
+                            of <strong>{db.length}</strong>
+                        </div>
+                    )}
+
                     <div className={styles.results}>
                         <List
                             rowCount={results.length}
-                            rowHeight={rowHeight}
+                            rowHeight={1}
                             rowComponent={ExerciseCard}
                             rowProps={{ results, selected, setSelected }}
                         />
@@ -296,22 +299,41 @@ export function ExerciseSearch() {
     )
 }
 
-function ExerciseCard({ index, results, selected, setSelected }: RowComponentProps<{ results: ExerciseDB[], selected: string[], setSelected: Dispatch<SetStateAction<string[]>> }>) {
+// Multiple Selections at once bad
+
+function ExerciseCard({ index, results, selected, setSelected }: RowComponentProps<{ results: ExerciseDB[], selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
-    const isSelected = selected.includes(exercise.name);
+    const [showAlt, setShowAlt] = useState(false);
+    const [expanded, setExpanded] = useState(false);
+    const previewSteps = exercise.instructions.slice(0, 3);
+    const hiddenSteps = exercise.instructions.length - previewSteps.length;
+    const isSelected = selected === exercise.name;
 
     const toggleSelect = () => {
-        setSelected(prev => prev.includes(exercise.name) ? prev.filter(n => n !== exercise.name) : [...prev, exercise.name]);
+        setSelected(prev =>
+            prev === exercise.name ? null : exercise.name
+        );
     };
+
+    useEffect(() => {
+        if (!isSelected) {
+            setShowAlt(false);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            setShowAlt(prev => !prev);
+        }, 500); // speed of "gif"
+
+        return () => clearInterval(interval);
+    }, [isSelected]);
 
     return (
         <div
             className={`${styles.exerciseCard} ${isSelected ? styles.selected : ""}`}
             onClick={toggleSelect}
         >
-            <h3>{exercise.name}</h3>
-
             {isSelected && (
                 <button
                     className={styles.checkmark}
@@ -325,19 +347,43 @@ function ExerciseCard({ index, results, selected, setSelected }: RowComponentPro
                 </button>
             )}
 
-            <div>
-                <img src={images.start} loading="lazy" decoding="async" alt="start" width="400" height="300" />
-                {/*<img src={images.end} loading="lazy" alt="end" />*/}
+            <div className={styles.cardHeader}>
+                <h3 className={styles.cardTitle}>{exercise.name}</h3>
             </div>
 
-            <p><strong>Level:</strong> {exercise.level}</p>
-            <p><strong>Equipment:</strong> {exercise.equipment}</p>
+            <div className={styles.imageWrapper}>
+                <img
+                    src={showAlt ? images.end : images.start}
+                    loading="lazy"
+                    decoding="async"
+                    alt={exercise.name}
+                    className={styles.exerciseImage}
+                />
+            </div>
 
-            <ul>
-                {exercise.instructions.map((step, i) => (
+
+            <div className={styles.metaRow}>
+                <span><strong>Level:</strong> {capitalize(exercise.level)}</span>
+                <span><strong>Equipment:</strong> {capitalize(exercise.equipment)}</span>
+            </div>
+
+            <ul className={`${styles.instructions} ${expanded ? styles.expanded : ""}`}>
+                {(expanded ? exercise.instructions : previewSteps).map((step, i) => (
                     <li key={i}>{step}</li>
                 ))}
             </ul>
+
+            {exercise.instructions.length > 3 && (
+                <button
+                    className={styles.expandButton}
+                    onClick={e => {
+                        e.stopPropagation();
+                        setExpanded(v => !v);
+                    }}
+                >
+                    {expanded ? "Show less" : `Show ${hiddenSteps} step${hiddenSteps > 1 ? "s" : ""}`}
+                </button>
+            )}
         </div>
     );
 }
