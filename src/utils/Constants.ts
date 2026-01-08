@@ -40,10 +40,9 @@ export const NoWorkout: TrackedWorkout = {
 
 export const Muscles= ['abdominals', 'hamstrings', 'calves', 'shoulders', 'adductors', 'glutes', 'quadriceps', 'biceps', 'forearms', 'abductors', 'triceps', 'chest', 'lower back', 'traps', 'middle back', 'lats', 'neck']
 export const Equipment = ['body only', 'machine', 'other', 'foam roll', 'kettlebells', 'dumbbell', 'cable', 'barbell', 'bands', 'medicine ball', 'exercise ball', 'e-z curl bar']
-export const Mechanic = ['compound', null, 'isolation']
-export const Level = ['beginner', 'intermediate', 'expert']
-export const Force = ['pull', 'push', 'static', null]
-export const Category = ['strength', 'stretching', 'plyometrics', 'strongman', 'powerlifting', 'cardio', 'olympic weightlifting']
+// export const Mechanic = ['compound', 'isolation']
+// export const Level = ['beginner', 'intermediate', 'expert']
+// export const Category = ['strength', 'stretching', 'plyometrics', 'strongman', 'powerlifting', 'cardio', 'olympic weightlifting']
 
 export const MuscleGroups = {
     Legs: ['hamstrings', 'calves', 'adductors', 'glutes', 'quadriceps', 'abdominals'],

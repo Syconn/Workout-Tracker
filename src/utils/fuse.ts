@@ -4,15 +4,9 @@ export function createFuse(exercises: ExerciseDB[]) {
     return new Fuse(exercises, {
         keys: [
             "name",
-            "primaryMuscles",
-            "secondaryMuscles",
-            "equipment",
-            "level",
-            "category",
-            "id"
+            "id",
         ],
-        threshold: 0.35, 
+        threshold: 0.25,
         ignoreLocation: true,
-        minMatchCharLength: 2
     });
 }

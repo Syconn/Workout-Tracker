@@ -61,17 +61,18 @@
     text-overflow: ellipsis;
 }
 
-/*.searchDropDown {*/
-/*    background-color: #111;*/
-/*    color: #f5f5f5;*/
-/*    width: 80%;*/
-/*}*/
-
 .selectorInput:focus,
 .searchDropDown:focus {
     outline: none;
     border-color: #22c55e;
     box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+}
+
+.controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .categoryRow {
@@ -91,7 +92,7 @@
 }
 
 .categorySelect {
-    width: 80px;
+    width: 120px;
 
     background: #111;
     color: #f5f5f5;
@@ -107,6 +108,50 @@
     outline: none;
     border-color: #22c55e;
     box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.25);
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-left: auto;
+    font-size: 0.9rem;
+    color: #e5e7eb;
+    cursor: pointer;
+}
+
+.toggle input {
+    display: none;
+}
+
+.slider {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    background: #2a2a2a;
+    border-radius: 999px;
+    transition: background 0.2s ease;
+}
+
+.slider::before {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    background: #9ca3af;
+    border-radius: 50%;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.toggle input:checked + .slider {
+    background: #22c55e;
+}
+
+.toggle input:checked + .slider::before {
+    transform: translateX(20px);
+    background: #052e16;
 }
 
 .heading {
@@ -335,6 +380,27 @@
     transition: transform 0.25s ease;
 }
 
+.exerciseImage {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 10px;
+
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    will-change: opacity;
+}
+
+.exerciseImage.hidden {
+    max-height: 0;
+    margin: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.exerciseImage.visible {
+    opacity: 1;
+}
+
 .metaRow {
     display: flex;
     gap: 14px;
@@ -447,8 +513,9 @@ h1 {
 }
 
 .stickySearch {
-    border-radius: 16px 16px 0 0;
+    border-radius: 16px ;
     position: sticky;
+    padding-top: 16px;
     top: 0;
     z-index: 20;
     background: #1e1e1e;

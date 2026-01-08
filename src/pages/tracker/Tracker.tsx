@@ -1,7 +1,7 @@
-import {Dispatch, SetStateAction, useEffect, useMemo, useState} from "react";
+import React, {Dispatch, memo, SetStateAction, useEffect, useMemo, useState} from "react";
 import {capitalize, getExerciseImage} from "../../utils/Util.tsx";
-import {Outlet, useNavigate} from "react-router-dom";
-import {NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
+import {NavigateFunction, Outlet, useLocation, useNavigate} from "react-router-dom";
+import {MuscleGroups, Muscles, NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
 import {AccountData} from "../accounts/AccountManager.tsx";
 import {List, RowComponentProps} from 'react-window';
 import homeStyles from "../home/Home.module.css";
@@ -103,6 +103,9 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
     const [exercise, setExercise] = useState("");
     const [open, setOpen] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    const selectedExercise = location.state?.exercise ?? null;
 
     const fuse = new Fuse(exerciseNames, {
         threshold: 0.15,
@@ -110,6 +113,13 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
     });
 
     const results = fuse.search(exercise).map(r => r.item);
+
+    useEffect(() => {
+        if (selectedExercise != null) {
+            setAdding(true)
+            setExercise(selectedExercise)
+        }
+    }, [selectedExercise]);
 
     useEffect(() => {
         if (workout === NoWorkout) navigate(`${Pages.TrackerPage}/${Pages.StartPage}`)
@@ -199,20 +209,36 @@ export function Tracker({ account }: { account: AccountData }) {
 export function ExerciseSearch() {
     const [query, setQuery] = useState("");
     const [muscleCategory, setMuscleCategory] = useState("");
+    const [equipment, setEquipment] = useState("");
+    const [muscleCategories, setMuscleCategories] = useState<string[]>([]);
     const [results, setResults] = useState<ExerciseDB[]>(exerciseDB as ExerciseDB[]);
     const [filters, setFilters] = useState<string[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
+    const [showImages, setShowImages] = useState(false);
 
-    const muscleCategories = ["Legs", "Push", "Pull", "Back", "Arms", "Chest", "UpperBody", "LowerBody"];
     const db = exerciseDB as ExerciseDB[];
     const fuse = useMemo(() => createFuse(db), [db]);
     const navigate = useNavigate();
 
     useEffect(() => {
         let filtered = query.trim() ? fuse.search(query).map(r => r.item) : db;
-        if (filters.length) filtered = filtered.filter(ex => filters.some(f => ex.primaryMuscles?.includes(f) || ex.equipment?.includes(f)));
+        if (filters.length && muscleCategory !== "") filtered = filtered.filter(ex => {
+            if (!filters.length) return true;
+            return filters.some(f => {
+                if (muscleCategory === "Muscles") return ex.primaryMuscles?.includes(f) || ex.secondaryMuscles?.includes(f);
+                else if (muscleCategory === "Muscle Groups") return MuscleGroups[f as keyof typeof MuscleGroups].some(s => ex.primaryMuscles?.includes(s) || ex.secondaryMuscles?.includes(s))
+                return true;
+            })
+        });
+        if (equipment.length) filtered = filtered.filter(ex => ex.equipment?.includes(equipment));
         setResults(filtered);
-    }, [query, filters, fuse, db]);
+    }, [query, filters, fuse, db, muscleCategory, equipment]);
+
+    useEffect(() => {
+        if (muscleCategory === "Muscle Groups") setMuscleCategories(Object.keys(MuscleGroups))
+        else if (muscleCategory === "Muscles") setMuscleCategories(Muscles)
+        else setMuscleCategories([])
+    }, [muscleCategory]);
 
     return (
         <div className={homeStyles.page}>
@@ -222,7 +248,7 @@ export function ExerciseSearch() {
                 </div>
 
                 <div className={homeStyles.headerCenter}>
-                    <h1 className={homeStyles.title}>Profile</h1>
+                    <h1 className={homeStyles.title}>Search</h1>
                 </div>
 
                 <div className={homeStyles.headerRight}>
@@ -236,21 +262,51 @@ export function ExerciseSearch() {
                 <div className={styles.selectorCard}>
                     <h1>Workout Tracker</h1>
 
-                    <div className={styles.categoryRow}>
-                        <span className={styles.categoryLabel}>Search Category</span>
+                    <div className={styles.controls}>
+                        <div className={styles.categoryRow}>
+                            <span className={styles.categoryLabel}>Search Category</span>
 
-                        <select
-                            className={styles.categorySelect}
-                            value={muscleCategory}
-                            onChange={e => setMuscleCategory(e.target.value)}
-                        >
-                            <option value="">All</option>
-                            <option value="push">Push</option>
-                            <option value="pull">Pull</option>
-                            <option value="legs">Legs</option>
-                            <option value="upper">Upper</option>
-                            <option value="lower">Lower</option>
-                        </select>
+                            <select
+                                className={styles.categorySelect}
+                                value={muscleCategory}
+                                onChange={e => setMuscleCategory(e.target.value)}
+                            >
+                                <option value="">All</option>
+                                <option value="Muscle Groups">Muscle Groups</option>
+                                <option value="Muscles">Muscles</option>
+                            </select>
+
+                            <span className={styles.categoryLabel}>Select Equipment</span>
+
+                            <select
+                                className={styles.categorySelect}
+                                value={equipment}
+                                onChange={e => setEquipment(e.target.value)}
+                            >
+                                <option value="">All</option>
+                                <option value="body only">Body Weight</option>
+                                <option value="machine">Machine</option>
+                                <option value="foam roll">Foam Roll</option>
+                                <option value="kettlebells">Kettlebells</option>
+                                <option value="dumbbell">Dumbbell</option>
+                                <option value="cable">Cable</option>
+                                <option value="barbell">Barbell</option>
+                                <option value="bands">Bands</option>
+                                <option value="medicine ball">Medicine Ball</option>
+                                <option value="exercise ball">Exercise Ball</option>
+                                <option value="e-z curl bar">EZ Curl Bar</option>
+                            </select>
+                        </div>
+
+                        <label className={styles.toggle}>
+                            <span>Show Images</span>
+                            <input
+                                type="checkbox"
+                                checked={showImages}
+                                onChange={e => setShowImages(e.target.checked)}
+                            />
+                            <span className={styles.slider} />
+                        </label>
                     </div>
 
                     <div className={styles.stickySearch}>
@@ -262,13 +318,13 @@ export function ExerciseSearch() {
                         />
 
                         <div className={styles.pills}>
-                            {muscleCategories.map(tag => (
+                                {muscleCategories.map(tag => (
                                 <button
                                     key={tag}
                                     className={`${styles.pill} ${filters.includes(tag) ? styles.active : ""}`}
                                     onClick={() => setFilters(f => f.includes(tag) ? f.filter(t => t !== tag) : [...f, tag])}
                                 >
-                                    {tag}
+                                    {capitalize(tag)}
                                 </button>
                             ))}
                         </div>
@@ -285,9 +341,9 @@ export function ExerciseSearch() {
                     <div className={styles.results}>
                         <List
                             rowCount={results.length}
-                            rowHeight={1}
+                            rowHeight={420}
                             rowComponent={ExerciseCard}
-                            rowProps={{ results, selected, setSelected }}
+                            rowProps={{ navigate, results, showImages, selected, setSelected }}
                         />
                         {results.length === 0 && (
                             <p className={styles.noResults}>No exercises found</p>
@@ -299,12 +355,9 @@ export function ExerciseSearch() {
     )
 }
 
-// Multiple Selections at once bad
-
-function ExerciseCard({ index, results, selected, setSelected }: RowComponentProps<{ results: ExerciseDB[], selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
+const ExerciseCard = memo(function ExerciseCard({ navigate, index, results, showImages, selected, setSelected }: RowComponentProps<{ navigate: NavigateFunction, results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
-    const [showAlt, setShowAlt] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const previewSteps = exercise.instructions.slice(0, 3);
     const hiddenSteps = exercise.instructions.length - previewSteps.length;
@@ -316,18 +369,9 @@ function ExerciseCard({ index, results, selected, setSelected }: RowComponentPro
         );
     };
 
-    useEffect(() => {
-        if (!isSelected) {
-            setShowAlt(false);
-            return;
-        }
-
-        const interval = setInterval(() => {
-            setShowAlt(prev => !prev);
-        }, 500); // speed of "gif"
-
-        return () => clearInterval(interval);
-    }, [isSelected]);
+    const handleConfirm = () => {
+        navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, { state: { exercise: exercise.name } });
+    }
 
     return (
         <div
@@ -339,7 +383,7 @@ function ExerciseCard({ index, results, selected, setSelected }: RowComponentPro
                     className={styles.checkmark}
                     onClick={e => {
                         e.stopPropagation();
-                        toggleSelect();
+                        handleConfirm();
                     }}
                     aria-label="Selected"
                 >
@@ -352,15 +396,16 @@ function ExerciseCard({ index, results, selected, setSelected }: RowComponentPro
             </div>
 
             <div className={styles.imageWrapper}>
-                <img
-                    src={showAlt ? images.end : images.start}
-                    loading="lazy"
-                    decoding="async"
-                    alt={exercise.name}
-                    className={styles.exerciseImage}
-                />
+                {showImages && (
+                    <img
+                        src={images.start}
+                        loading="lazy"
+                        decoding="async"
+                        alt={exercise.name}
+                        className={styles.exerciseImage}
+                    />
+                )}
             </div>
-
 
             <div className={styles.metaRow}>
                 <span><strong>Level:</strong> {capitalize(exercise.level)}</span>
@@ -386,4 +431,4 @@ function ExerciseCard({ index, results, selected, setSelected }: RowComponentPro
             )}
         </div>
     );
-}
+});
