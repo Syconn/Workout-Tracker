@@ -1,4 +1,4 @@
-import React, {Dispatch, memo, SetStateAction, useEffect, useMemo, useState} from "react";
+import {Dispatch, memo, SetStateAction, useEffect, useMemo, useState} from "react";
 import {capitalize, getExerciseImage} from "../../utils/Util.tsx";
 import {NavigateFunction, Outlet, useLocation, useNavigate} from "react-router-dom";
 import {MuscleGroups, Muscles, NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
@@ -29,18 +29,24 @@ export type TrackedWorkout = {
     type: string;
     date: Date;
     workout_length_minutes: number;
-    sets: Set[]
+    lifts: Lift[]
 }
 
-export type Set = {
+export type Lift = {
     exercise_id: string;
-    reps: Rep[]
+    set: Rep[];
 }
 
 export type Rep = {
     weight: number;
     reps: number;
-    superset: Rep[]
+    superset?: Superset[]
+}
+
+export type Superset = {
+    exercise_id: string;
+    weight: number;
+    reps: number;
 }
 
 export type SetWorkoutProp = {
@@ -48,11 +54,13 @@ export type SetWorkoutProp = {
 }
 
 export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout } & SetWorkoutProp) {
-    const [type, setType] = useState("")
+    const [type, setType] = useState<string>("")
+    const [open, setOpen] = useState<boolean>(true)
     const navigate = useNavigate();
 
     const track = () => {
         setWorkout("type", type)
+        setWorkout("lifts", [])
         navigate(Pages.TrackPage)
     }
 
@@ -82,14 +90,25 @@ export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout 
                 <div className={styles.selectorCard}>
                     <span className={styles.selectorLabel}>Workout Type</span>
 
-                    <select className={styles.selectorInput} onChange={val => setType(val.target.value)}>
-                        <option value="">Select a workout</option>
-                        <option value="push">Push</option>
-                        <option value="pull">Pull</option>
-                        <option value="legs">Legs</option>
-                        <option value="upper">Upper</option>
-                        <option value="lower">Lower</option>
-                    </select>
+                    <div className={styles.fakeSelect}>
+                        <button onClick={() => setOpen(v => !v)}>{capitalize(type) || "Select a workout"}</button>
+
+                        {open && (
+                            <ul className={styles.menu}>
+                                {["push", "pull", "legs", "upper", "lower"].map(v => (
+                                    <li
+                                        key={v}
+                                        onClick={() => {
+                                            setType(v);
+                                            setOpen(false);
+                                        }}
+                                    >
+                                        {capitalize(v)}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
 
                     <button className={styles.trackButton} disabled={type === ""} onClick={track}>Track Workout</button>
                 </div>
@@ -100,11 +119,14 @@ export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout 
 
 export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & SetWorkoutProp) { // Cancel Button
     const [adding, setAdding] = useState(false)
-    const [exercise, setExercise] = useState("");
+    const [pickExercise, pickedExercise] = useState(false)
     const [open, setOpen] = useState(false);
+    const [exercise, setExercise] = useState("");
+    const [lifts, setLifts] = useState<Lift[]>(workout.lifts ? workout.lifts : []);
+    const [targetSet, setTargetSet] = useState<number>(lifts.length - 1);
+
     const navigate = useNavigate();
     const location = useLocation();
-
     const selectedExercise = location.state?.exercise ?? null;
 
     const fuse = new Fuse(exerciseNames, {
@@ -114,12 +136,83 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
 
     const results = fuse.search(exercise).map(r => r.item);
 
+    const addLift = (exercise: string) => {
+        setLifts(prev => {
+            const copy = structuredClone(prev);
+            copy.push({exercise_id: exercise, set: [{ weight: 0, reps: 0 }]})
+            return copy;
+        });
+    }
+
+    const updateRep = (liftIndex: number, setIndex: number, field: "weight" | "reps", value: number) => {
+        setLifts(prev => {
+            const copy = structuredClone(prev);
+            copy[liftIndex].set[setIndex][field] = value;
+            return copy;
+        });
+    };
+
+    // const addRep = (setIndex: number) => {
+    //     setSets(prev => {
+    //         const copy = structuredClone(prev);
+    //         copy[setIndex].reps.push({ weight: 0, reps: 0 });
+    //         return copy;
+    //     });
+    // };
+    //
+    // const remRep = (setIndex: number) => {
+    //     setSets(prev => {
+    //         const copy = structuredClone(prev);
+    //         copy[setIndex].reps.pop();
+    //         return copy;
+    //     });
+    // };
+
+    const updateSuperset = (liftIndex: number, setIndex: number, supersetIndex: number, field: "weight" | "reps", value: number) => {
+        setLifts(prev => {
+            const copy = structuredClone(prev);
+            const rep = copy[liftIndex].set[setIndex];
+
+            if (!rep.superset) rep.superset = []
+            rep.superset[supersetIndex][field] = value
+            return copy;
+        });
+    };
+
+    const addSuperset = (liftIndex: number, setIndex: number) => {
+        setLifts(prev => {
+            const copy = structuredClone(prev);
+            const rep = copy[liftIndex].set[setIndex];
+
+            if (!rep.superset) rep.superset = [];
+            rep.superset.push({ weight: 0, reps: 0, exercise_id: "" });
+
+            return copy;
+        });
+    };
+
+    const remSuperset = (liftIndex: number, setIndex: number) => {
+        setLifts(prev => {
+            const copy = structuredClone(prev);
+            const rep = copy[liftIndex].set[setIndex];
+
+            if (!rep.superset) rep.superset = [];
+            rep.superset.pop();
+
+            return copy;
+        });
+    };
+
     useEffect(() => {
         if (selectedExercise != null) {
             setAdding(true)
             setExercise(selectedExercise)
         }
     }, [selectedExercise]);
+
+    useEffect(() => {
+        if (workout !== NoWorkout) setWorkout("lifts", lifts)
+    }, [lifts, setWorkout, workout]);
 
     useEffect(() => {
         if (workout === NoWorkout) navigate(`${Pages.TrackerPage}/${Pages.StartPage}`)
@@ -145,49 +238,169 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
 
             <main className={styles.profileContainer}>
                 <div className={styles.selectorCard}>
-                    <button className={styles.trackButton} onClick={() => setAdding(!adding)} hidden={adding}>Add a Lift</button>
-                    {adding && (
-                        <div className={styles.innerCard}>
-                            <div className={styles.searchRow}>
-                                <button className={styles.iconButton} onClick={() => navigate(`${Pages.TrackerPage}/${Pages.SearchPage}`)} data-tooltip="Find Exercise">🔎</button>
+                    <div className={styles.innerCard}>
+                        <button className={styles.trackButton} onClick={() => setAdding(!adding)} hidden={adding}>Add a Lift</button>
 
-                                <div className={styles.autocomplete}>
-                                    <input
-                                        className={styles.selectorInput}
-                                        placeholder="Enter Exercise"
-                                        value={exercise}
-                                        onChange={e => {
-                                            setExercise(e.target.value);
-                                            setOpen(true);
-                                        }}
-                                        onBlur={() => setTimeout(() => setOpen(false), 100)}
-                                        onClick={() => setOpen(true)}
-                                    />
+                        {adding && (
+                            <div>
+                                {!pickExercise && (
+                                    <div className={styles.searchRow}>
+                                        <button className={styles.iconButton}
+                                                onClick={() => navigate(`${Pages.TrackerPage}/${Pages.SearchPage}`)}
+                                                data-tooltip="Find Exercise">🔎
+                                        </button>
 
-                                    {open && exercise && (
-                                        <ul className={styles.suggestions}>
-                                            {results.map((item, i) => (
-                                                <li
-                                                    key={i}
-                                                    onClick={() => {
-                                                        setExercise(item);
-                                                        setOpen(false);
-                                                    }}
-                                                >
-                                                    {item}
-                                                </li>
+                                        <div className={styles.autocomplete}>
+                                            <input
+                                                className={styles.selectorInput}
+                                                placeholder="Enter Exercise"
+                                                value={exercise}
+                                                onChange={e => {
+                                                    setExercise(e.target.value);
+                                                    setOpen(true);
+                                                }}
+                                                onBlur={() => setTimeout(() => setOpen(false), 100)}
+                                                onClick={() => setOpen(true)}
+                                            />
+
+                                            {open && exercise && (
+                                                <ul className={styles.suggestions}>
+                                                    {results.map((item, i) => (
+                                                        <li
+                                                            key={i}
+                                                            onClick={() => {
+                                                                setExercise(item);
+                                                                setOpen(false);
+                                                            }}
+                                                        >
+                                                            {item}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+
+                                        <button className={styles.confirmButton} data-tooltip="Track Exercise"
+                                                onClick={() => {
+                                                    pickedExercise(true)
+                                                    addLift(exercise)
+                                                }}>✅
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* Modify Selected Workout */}
+                                {pickExercise && (
+                                    <div>
+                                        <div className={styles.setCard}>
+                                            <h4>{exercise} Set</h4>
+
+                                            {lifts[selectedExercise].set.map((rep, repIndex) => (
+                                                <div key={repIndex} className={styles.repRow}>
+                                                    <div className={styles.field}>
+                                                        <label className={styles.label}>
+                                                            Weight
+                                                            <input
+                                                                type="number"
+                                                                className={styles.input}
+                                                                value={Number(rep.weight).toString()}
+                                                                onChange={e =>
+                                                                    updateRep(0, repIndex, "weight", +e.target.value)
+                                                                }
+                                                            />
+                                                        </label>
+                                                    </div>
+
+                                                    <div className={styles.field}>
+                                                        <label className={styles.label}>
+                                                            Reps
+                                                            <input
+                                                                type="number"
+                                                                className={styles.input}
+                                                                value={Number(rep.reps).toString()}
+                                                                onChange={e =>
+                                                                    updateRep(0, repIndex, "reps", +e.target.value)
+                                                                }
+                                                            />
+                                                        </label>
+                                                    </div>
+
+                                                    {rep.superset?.map((ss, ssIndex) => (
+                                                        <div key={ssIndex} className={styles.supersetRow}>
+                                                            <input
+                                                                type="number"
+                                                                placeholder="SS Weight"
+                                                                value={Number(ss.weight).toString()}
+                                                                onChange={e => {
+                                                                    // updateSuperset()
+                                                                }}
+                                                            />
+                                                            <input
+                                                                type="number"
+                                                                placeholder="SS Reps"
+                                                                value={Number(ss.reps).toString()}
+                                                                onChange={e => {
+                                                                    // updateSuperset()
+                                                                }}
+                                                            />
+                                                        </div>
+                                                    ))}
+
+                                                    {/*<button onClick={() => addSuperset(setIndex, repIN)} className={styles.addButton}>Add Superset</button>*/}
+                                                    {/*<button onClick={() => remSuperset(setIndex)} className={styles.remButton}>Remove Superset</button>*/}
+                                                </div>
                                             ))}
-                                        </ul>
-                                    )}
-                                </div>
+                                        </div>
+                                    </div>
+                                )}
 
-                                <button className={styles.confirmButton}  data-tooltip="Track Exercise">✅</button>
+                                <button className={styles.removeButton2} onClick={() => setAdding(!adding)} hidden={!adding}>Cancel Lift</button>
                             </div>
+                        )}
+                    </div>
 
-                            <button className={styles.removeButton} onClick={() => setAdding(!adding)} hidden={!adding}>Remove Lift</button>
-                        </div>
-                    )}
-                    <h2 className={styles.heading}>Current Workout</h2>
+                    {/* Recorded Workouts */}
+                    <div className={styles.innerCard}>
+                        <h2 className={styles.heading2}>Recorded Lifts</h2>
+
+                        {lifts.map(((value, index) => (
+                            <div key={index} className={styles.setCard2}>
+                                <h4>{value.exercise_id}</h4>
+
+                                {value.set.map((rep, repIndex) => (
+                                    <div key={repIndex} className={styles.repRow2}>
+                                        <div className={styles.field}>
+                                            <label className={styles.label2}>{repIndex + 1}: </label>
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <label className={styles.label2}>Weight: {rep.weight}</label>
+                                        </div>
+
+                                        <div className={styles.field}>
+                                            <label className={styles.label2}>Reps: {rep.reps}</label>
+                                        </div>
+
+                                        {rep.superset?.map((ss, ssIndex) => (
+                                            <div key={ssIndex} className={styles.supersetRow2}>
+                                                <div className={styles.field}>
+                                                    <label className={styles.label2}>
+                                                        Weight: {ss.weight}
+                                                    </label>
+                                                </div>
+
+                                                <div className={styles.field}>
+                                                    <label className={styles.label2}>
+                                                        Reps: {ss.reps}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ))}
+                            </div>
+                        )))}
+                    </div>
                 </div>
             </main>
         </div>
@@ -355,7 +568,7 @@ export function ExerciseSearch() {
     )
 }
 
-const ExerciseCard = memo(function ExerciseCard({ navigate, index, results, showImages, selected, setSelected }: RowComponentProps<{ navigate: NavigateFunction, results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
+function ExerciseCard({ navigate, index, results, showImages, selected, setSelected }: RowComponentProps<{ navigate: NavigateFunction, results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
     const [expanded, setExpanded] = useState(false);
@@ -431,4 +644,4 @@ const ExerciseCard = memo(function ExerciseCard({ navigate, index, results, show
             )}
         </div>
     );
-});
+}

@@ -31,23 +31,24 @@ function App() {
 		if (trackedWorkout != NoWorkout) localStorage.setItem("trackedWorkout", JSON.stringify(trackedWorkout))
 	}, [trackedWorkout]);
 
-	useEffect(() => {
-		if (account === NoAccount) return;
+	// useEffect(() => { TODO FIX  WHY REFRESHING KILLS IT
+	// 	if (account === NoAccount) return;
+	//
+	// 	let cancelled = false;
+	//
+	// 	(async () => {
+	// 		const validated = await validateSession(account);
+	// 		if (!cancelled) {
+	// 			setAccount(validated);
+	// 			if (validated === NoAccount) logout(setAccount);
+	// 		}
+	// 	})();
+	//
+	// 	return () => {
+	// 		cancelled = true;
+	// 	};
+	// }, [account]);
 
-		let cancelled = false;
-
-		(async () => {
-			const validated = await validateSession(account);
-			if (!cancelled) {
-				setAccount(validated);
-				if (validated === NoAccount) logout(setAccount);
-			}
-		})();
-
-		return () => {
-			cancelled = true;
-		};
-	}, [account]);
 
 
 	return (
