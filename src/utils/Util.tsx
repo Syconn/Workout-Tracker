@@ -30,9 +30,13 @@ function useSetProp<T>(setState: React.Dispatch<React.SetStateAction<T>>): <K ex
     );
 }
 
-export function useTypeState<T>(val: T | (() => T)): [T, <K extends keyof T>(key: K, value: T[K]) => void] {
+export function useTypeState<T>(val: T | (() => T)): [T, <K extends keyof T>(key: K, value: T[K]) => void, (next: T) => void] {
     const [state, setState] = useState(val);
-    return [state, useSetProp(setState)];
+
+    const setProp = useSetProp(setState);
+    const setAll = useCallback((next: T) => setState(next), []);
+
+    return [state, setProp, setAll];
 }
 
 export function useDebounce<T>(value: T, delay: number): T {
@@ -76,7 +80,7 @@ export function getExerciseImage(images: string[]) {
 }
 
 export function capitalize(s: string): string {
-    if (s === null) return "None"
+    if (s === undefined) return "None"
     let r: string = "";
     for (let i = 0; i < s.length; i++) {
         if (i == 0) r += s[0].toLocaleUpperCase();

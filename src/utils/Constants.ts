@@ -33,10 +33,9 @@ export const NoAccount: AccountData = {
 
 export const NoWorkout: TrackedWorkout = {
     date: new Date(0, 0, 0),
-    sets: [],
+    lifts: [],
     type: "",
     workout_length_minutes: 0,
-    activeSet: 0
 }
 
 export const Muscles= ['abdominals', 'hamstrings', 'calves', 'shoulders', 'adductors', 'glutes', 'quadriceps', 'biceps', 'forearms', 'abductors', 'triceps', 'chest', 'lower back', 'traps', 'middle back', 'lats', 'neck']

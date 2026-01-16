@@ -22,7 +22,7 @@ function App() {
 		return local ? JSON.parse(local) : session ? JSON.parse(session) : NoAccount
 	})
 
-	const [trackedWorkout, setTrackedWorkout] = useTypeState<TrackedWorkout>(() => {
+	const [trackedWorkout, setTrackedWorkoutProp, setTrackedWorkout] = useTypeState<TrackedWorkout>(() => {
 		const local = localStorage.getItem("trackedWorkout")
 		return local ? JSON.parse(local) : NoWorkout
 	})
@@ -60,8 +60,8 @@ function App() {
 				<Route path={Pages.ProfilePage} element={<Profile account={account} setAccount={setAccount} />} />
 				<Route path={Pages.TrackerPage} element={<Tracker account={account} />} >
 					<Route index element={<Navigate to={Pages.StartPage} replace />} />
-					<Route path={Pages.StartPage} element={<TrackerStart workout={trackedWorkout} setWorkout={setTrackedWorkout} />} />
-					<Route path={Pages.TrackPage} element={<Track workout={trackedWorkout} setWorkout={setTrackedWorkout} />} />
+					<Route path={Pages.StartPage} element={<TrackerStart workout={trackedWorkout} setWorkoutProp={setTrackedWorkoutProp} setWorkout={setTrackedWorkout} />} />
+					<Route path={Pages.TrackPage} element={<Track workout={trackedWorkout} setWorkoutProp={setTrackedWorkoutProp} setWorkout={setTrackedWorkout} />} />
 					<Route path={Pages.SearchPage} element={<ExerciseSearch />} />
 				</Route>
 				<Route path={Pages.AccountManager} element={<AccountManager account={account} />}>

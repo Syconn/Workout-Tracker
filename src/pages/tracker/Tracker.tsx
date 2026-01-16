@@ -1,4 +1,4 @@
-import {Dispatch, memo, SetStateAction, useEffect, useMemo, useState} from "react";
+import {Dispatch, SetStateAction, useEffect, useMemo, useState} from "react";
 import {capitalize, getExerciseImage} from "../../utils/Util.tsx";
 import {NavigateFunction, Outlet, useLocation, useNavigate} from "react-router-dom";
 import {MuscleGroups, Muscles, NoAccount, NoWorkout, Pages} from "../../utils/Constants.ts";
@@ -34,10 +34,10 @@ export type TrackedWorkout = {
 
 export type Lift = {
     exercise_id: string;
-    set: Rep[];
+    set: Set[];
 }
 
-export type Rep = {
+export type Set = {
     weight: number;
     reps: number;
     superset?: Superset[]
@@ -49,18 +49,20 @@ export type Superset = {
     reps: number;
 }
 
-export type SetWorkoutProp = {
-    setWorkout: <K extends keyof TrackedWorkout>(key: K, value: TrackedWorkout[K]) => void
+export type SetWorkoutProps = {
+    setWorkoutProp: <K extends keyof TrackedWorkout>(key: K, value: TrackedWorkout[K]) => void
+    setWorkout: (value: TrackedWorkout) => void
 }
 
-export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout } & SetWorkoutProp) {
+export function TrackerStart({workout, setWorkoutProp}: { workout: TrackedWorkout } & SetWorkoutProps) {
     const [type, setType] = useState<string>("")
-    const [open, setOpen] = useState<boolean>(true)
+    const [open, setOpen] = useState<boolean>(false)
     const navigate = useNavigate();
 
     const track = () => {
-        setWorkout("type", type)
-        setWorkout("lifts", [])
+        setWorkoutProp("type", type)
+        setWorkoutProp("lifts", [])
+        setWorkoutProp("date", new Date())
         navigate(Pages.TrackPage)
     }
 
@@ -72,7 +74,7 @@ export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout 
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo} />
+                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>
@@ -81,7 +83,7 @@ export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout 
 
                 <div className={homeStyles.headerRight}>
                     <button className={homeStyles.accountIcon} onClick={() => navigate("/")} title="Home">
-                        <Home size={20} color="#f5f5f5" strokeWidth={2} />
+                        <Home size={20} color="#f5f5f5" strokeWidth={2}/>
                     </button>
                 </div>
             </header>
@@ -117,13 +119,16 @@ export function TrackerStart({ workout, setWorkout }: { workout: TrackedWorkout 
     )
 }
 
-export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & SetWorkoutProp) { // Cancel Button
-    const [adding, setAdding] = useState(false)
-    const [pickExercise, pickedExercise] = useState(false)
+export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedWorkout } & SetWorkoutProps) {
     const [open, setOpen] = useState(false);
+    const [innerOpen, setInnerOpen] = useState<[number, number, boolean]>([0, 0, false]);
     const [exercise, setExercise] = useState("");
-    const [lifts, setLifts] = useState<Lift[]>(workout.lifts ? workout.lifts : []);
-    const [targetSet, setTargetSet] = useState<number>(lifts.length - 1);
+    const [lift, setLift] = useState<number>(() => {
+        const session = sessionStorage.getItem("lift")
+        return session ? JSON.parse(session) : -1
+    });
+    const [pickExercise, pickedExercise] = useState(lift !== -1)
+    const [adding, setAdding] = useState(lift !== -1)
 
     const navigate = useNavigate();
     const location = useLocation();
@@ -135,72 +140,70 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
     });
 
     const results = fuse.search(exercise).map(r => r.item);
+    const innerResults = lift !== -1 ? fuse.search(workout.lifts[lift]?.set?.[innerOpen[0]]?.superset?.[innerOpen[1]]?.exercise_id ?? "").map(r => r.item) : [];
 
     const addLift = (exercise: string) => {
-        setLifts(prev => {
-            const copy = structuredClone(prev);
-            copy.push({exercise_id: exercise, set: [{ weight: 0, reps: 0 }]})
-            return copy;
-        });
+        const copy = structuredClone(workout.lifts);
+        copy.push({exercise_id: exercise, set: [{weight: 0, reps: 0}]})
+        setWorkoutProp("lifts", copy);
+        setLift(copy.length - 1)
+    }
+
+    const remLift = (lift: number) => {
+        const copy = structuredClone(workout.lifts).filter((_, i) => i !== lift);
+        setWorkoutProp("lifts", copy);
     }
 
     const updateRep = (liftIndex: number, setIndex: number, field: "weight" | "reps", value: number) => {
-        setLifts(prev => {
-            const copy = structuredClone(prev);
-            copy[liftIndex].set[setIndex][field] = value;
-            return copy;
-        });
+        const copy = structuredClone(workout.lifts);
+
+        if (value < 0) return;
+        copy[liftIndex].set[setIndex][field] = value;
+        setWorkoutProp("lifts", copy);
     };
 
-    // const addRep = (setIndex: number) => {
-    //     setSets(prev => {
-    //         const copy = structuredClone(prev);
-    //         copy[setIndex].reps.push({ weight: 0, reps: 0 });
-    //         return copy;
-    //     });
-    // };
-    //
-    // const remRep = (setIndex: number) => {
-    //     setSets(prev => {
-    //         const copy = structuredClone(prev);
-    //         copy[setIndex].reps.pop();
-    //         return copy;
-    //     });
-    // };
+    const addSet = (liftIndex: number) => {
+        const copy = structuredClone(workout.lifts);
+        const rep = copy[liftIndex]
 
-    const updateSuperset = (liftIndex: number, setIndex: number, supersetIndex: number, field: "weight" | "reps", value: number) => {
-        setLifts(prev => {
-            const copy = structuredClone(prev);
-            const rep = copy[liftIndex].set[setIndex];
+        rep.set.push({ weight: 0, reps: 0, superset: [] });
+        setWorkoutProp("lifts", copy);
+    };
 
-            if (!rep.superset) rep.superset = []
-            rep.superset[supersetIndex][field] = value
-            return copy;
-        });
+    const remSet = (liftIndex: number, setIndex: number) => {
+        const copy = structuredClone(workout.lifts);
+        const rep = copy[liftIndex]
+
+        rep.set = rep.set.filter((_, index) => index !== setIndex);
+        setWorkoutProp("lifts", copy);
+    };
+
+    const updateSuperset = <K extends keyof Superset>(liftIndex: number, setIndex: number, supersetIndex: number, field: K, value: Superset[K]) => {
+        const copy = structuredClone(workout.lifts);
+        const rep = copy[liftIndex].set[setIndex];
+
+        if (!rep.superset) rep.superset = []
+        if (typeof value === "number" && value < 0) return;
+        rep.superset[supersetIndex][field] = value
+        setWorkoutProp("lifts", copy);
     };
 
     const addSuperset = (liftIndex: number, setIndex: number) => {
-        setLifts(prev => {
-            const copy = structuredClone(prev);
-            const rep = copy[liftIndex].set[setIndex];
+        const copy = structuredClone(workout.lifts);
+        const rep = copy[liftIndex].set[setIndex];
 
-            if (!rep.superset) rep.superset = [];
-            rep.superset.push({ weight: 0, reps: 0, exercise_id: "" });
-
-            return copy;
-        });
+        if (!rep.superset) rep.superset = [];
+        rep.superset.push({ weight: 0, reps: 0, exercise_id: copy[liftIndex].exercise_id });
+        setWorkoutProp("lifts", copy);
     };
 
-    const remSuperset = (liftIndex: number, setIndex: number) => {
-        setLifts(prev => {
-            const copy = structuredClone(prev);
-            const rep = copy[liftIndex].set[setIndex];
+    const remSuperset = (liftIndex: number, setIndex: number, ssIndex: number) => {
+        const copy = structuredClone(workout.lifts);
+        const rep = copy[liftIndex].set[setIndex];
 
-            if (!rep.superset) rep.superset = [];
-            rep.superset.pop();
-
-            return copy;
-        });
+        if (!rep.superset) return;
+        rep.superset = rep.superset.filter((_, index) => index !== ssIndex);
+        setWorkoutProp("lifts", copy);
     };
 
     useEffect(() => {
@@ -211,18 +214,18 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
     }, [selectedExercise]);
 
     useEffect(() => {
-        if (workout !== NoWorkout) setWorkout("lifts", lifts)
-    }, [lifts, setWorkout, workout]);
-
-    useEffect(() => {
         if (workout === NoWorkout) navigate(`${Pages.TrackerPage}/${Pages.StartPage}`)
     }, [navigate, workout]);
+
+    useEffect(() => {
+        sessionStorage.setItem("lift", JSON.stringify(lift));
+    }, [lift]);
 
     return (
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo} />
+                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>
@@ -231,15 +234,19 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
 
                 <div className={homeStyles.headerRight}>
                     <button className={homeStyles.accountIcon} onClick={() => navigate("/")} title="Home">
-                        <Home size={20} color="#f5f5f5" strokeWidth={2} />
+                        <Home size={20} color="#f5f5f5" strokeWidth={2}/>
                     </button>
                 </div>
             </header>
 
             <main className={styles.profileContainer}>
                 <div className={styles.selectorCard}>
+                    <h2 className={styles.heading}>{capitalize(workout.type)} Day</h2>
+
                     <div className={styles.innerCard}>
-                        <button className={styles.trackButton} onClick={() => setAdding(!adding)} hidden={adding}>Add a Lift</button>
+                        <button className={styles.trackButton} onClick={() => setAdding(!adding)} hidden={adding}>Add a
+                            Lift
+                        </button>
 
                         {adding && (
                             <div>
@@ -291,115 +298,202 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
 
                                 {/* Modify Selected Workout */}
                                 {pickExercise && (
-                                    <div>
-                                        <div className={styles.setCard}>
-                                            <h4>{exercise} Set</h4>
+                                    <div className={styles.setCard}>
+                                        <h4>{exercise} Lift</h4>
 
-                                            {lifts[selectedExercise].set.map((rep, repIndex) => (
-                                                <div key={repIndex} className={styles.repRow}>
+                                        {workout.lifts[lift] !== undefined && workout.lifts[lift].set.map((set, setIndex) => (
+                                            <div key={setIndex}>
+                                                <div className={styles.repRow}>
+                                                    <div className={styles.repIndex}>
+                                                        {setIndex + 1}
+                                                    </div>
+
                                                     <div className={styles.field}>
                                                         <label className={styles.label}>
-                                                            Weight
+                                                            Weight:
                                                             <input
                                                                 type="number"
                                                                 className={styles.input}
-                                                                value={Number(rep.weight).toString()}
-                                                                onChange={e =>
-                                                                    updateRep(0, repIndex, "weight", +e.target.value)
-                                                                }
+                                                                value={Number(set.weight).toString()}
+                                                                onChange={e => updateRep(lift, setIndex, "weight", +e.target.value)}
                                                             />
                                                         </label>
                                                     </div>
 
                                                     <div className={styles.field}>
                                                         <label className={styles.label}>
-                                                            Reps
+                                                            Reps:
                                                             <input
                                                                 type="number"
                                                                 className={styles.input}
-                                                                value={Number(rep.reps).toString()}
-                                                                onChange={e =>
-                                                                    updateRep(0, repIndex, "reps", +e.target.value)
-                                                                }
+                                                                value={Number(set.reps).toString()}
+                                                                onChange={e => updateRep(lift, setIndex, "reps", +e.target.value)}
                                                             />
                                                         </label>
                                                     </div>
 
-                                                    {rep.superset?.map((ss, ssIndex) => (
-                                                        <div key={ssIndex} className={styles.supersetRow}>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="SS Weight"
-                                                                value={Number(ss.weight).toString()}
-                                                                onChange={e => {
-                                                                    // updateSuperset()
-                                                                }}
-                                                            />
-                                                            <input
-                                                                type="number"
-                                                                placeholder="SS Reps"
-                                                                value={Number(ss.reps).toString()}
-                                                                onChange={e => {
-                                                                    // updateSuperset()
-                                                                }}
-                                                            />
+                                                    <div className={styles.supersetButtons}>
+                                                        <button onClick={() => addSuperset(lift, setIndex)} className={styles.addButton}>Add Superset</button>
+                                                        <button onClick={() => remSet(lift, setIndex)} className={styles.remButton}>Remove</button>
+                                                    </div>
+                                                </div>
+
+                                                <div className={styles.supersetsRow}>
+                                                    {set.superset?.map((ss, ssIndex) => (
+                                                        <div key={ssIndex} className={styles.supersets}>
+
+                                                            <div className={styles.autocomplete2}>
+                                                                <input
+                                                                    className={styles.selectorInput2}
+                                                                    placeholder="Enter Exercise"
+                                                                    value={ss.exercise_id}
+                                                                    onChange={e => {
+                                                                        updateSuperset(lift, setIndex, ssIndex, "exercise_id", e.target.value)
+                                                                        setInnerOpen([setIndex, ssIndex, true])
+                                                                    }}
+                                                                    onBlur={() => setTimeout(() => {
+                                                                        if (innerOpen[1] === ssIndex) setInnerOpen([setIndex, ssIndex, false])
+                                                                    }, 100)}
+                                                                    onClick={() => setInnerOpen([setIndex, ssIndex, true])}
+                                                                />
+
+                                                                {(innerOpen[0] === setIndex && innerOpen[1] === ssIndex && innerOpen[2] && ss.exercise_id) && (
+                                                                    <ul className={styles.suggestions}>
+                                                                        {innerResults.map((item, i) => (
+                                                                            <li
+                                                                                key={i}
+                                                                                onClick={() => {
+                                                                                    updateSuperset(lift, setIndex, ssIndex, "exercise_id", item)
+                                                                                    setInnerOpen([setIndex, ssIndex, false])
+                                                                                }}
+                                                                            >
+                                                                                {item}
+                                                                            </li>
+                                                                        ))}
+                                                                    </ul>
+                                                                )}
+                                                            </div>
+
+                                                            <div className={styles.field}>
+                                                                <label className={styles.label}>
+                                                                    Weight:
+                                                                    <input
+                                                                        type="number"
+                                                                        className={styles.input}
+                                                                        value={Number(ss.weight).toString()}
+                                                                        onChange={e => updateSuperset(lift, setIndex, ssIndex, "weight", +e.target.value)}
+                                                                    />
+                                                                </label>
+                                                            </div>
+
+                                                            <div className={styles.field}>
+                                                                <label className={styles.label}>
+                                                                    Reps:
+                                                                    <input
+                                                                        type="number"
+                                                                        className={styles.input}
+                                                                        value={Number(ss.reps).toString()}
+                                                                        onChange={e => updateSuperset(lift, setIndex, ssIndex, "reps", +e.target.value)}
+                                                                    />
+                                                                </label>
+                                                            </div>
+
+                                                            <div className={styles.supersetButtons2}>
+                                                                <button onClick={() => remSuperset(lift, setIndex, ssIndex)} className={styles.remButton}>Remove</button>
+                                                            </div>
                                                         </div>
                                                     ))}
-
-                                                    {/*<button onClick={() => addSuperset(setIndex, repIN)} className={styles.addButton}>Add Superset</button>*/}
-                                                    {/*<button onClick={() => remSuperset(setIndex)} className={styles.remButton}>Remove Superset</button>*/}
                                                 </div>
-                                            ))}
+                                            </div>
+                                        ))}
+
+                                        <div className={styles.supersetButtons2}>
+                                            <button onClick={() => addSet(lift)} className={styles.addButton}>Add Set</button>
+                                            <button onClick={() => {
+                                                setLift(-1)
+                                                setAdding(false)
+                                                pickedExercise(false)
+                                                setExercise("")
+                                            }} className={styles.compButton}>Done</button>
                                         </div>
                                     </div>
                                 )}
-
-                                <button className={styles.removeButton2} onClick={() => setAdding(!adding)} hidden={!adding}>Cancel Lift</button>
                             </div>
                         )}
                     </div>
 
                     {/* Recorded Workouts */}
-                    <div className={styles.innerCard}>
-                        <h2 className={styles.heading2}>Recorded Lifts</h2>
+                    {((workout.lifts.length > 0 && !adding) || (workout.lifts.length > 1)) && (
+                        <div className={styles.innerCard}>
+                            <h2 className={styles.heading2}>Recorded Lifts</h2>
 
-                        {lifts.map(((value, index) => (
-                            <div key={index} className={styles.setCard2}>
-                                <h4>{value.exercise_id}</h4>
-
-                                {value.set.map((rep, repIndex) => (
-                                    <div key={repIndex} className={styles.repRow2}>
-                                        <div className={styles.field}>
-                                            <label className={styles.label2}>{repIndex + 1}: </label>
+                            {workout.lifts.map(((value, index) => (
+                                index !== lift && (
+                                    <div key={index} className={styles.setCard2}>
+                                        <div className={styles.headerDone}>
+                                            <h4>{value.exercise_id}</h4>
+                                            <button onClick={() => {
+                                                pickedExercise(true)
+                                                setAdding(true)
+                                                setLift(index)
+                                            }} className={styles.compButtonRec}>Edit</button>
+                                            <button onClick={() => remLift(index)} className={styles.remButtonRec}>Remove</button>
                                         </div>
 
-                                        <div className={styles.field}>
-                                            <label className={styles.label2}>Weight: {rep.weight}</label>
-                                        </div>
+                                        {value.set.map((set, setIndex) => (
+                                            <div key={setIndex}>
+                                                <div className={styles.repRow}>
+                                                    <label> Set {setIndex + 1} |</label>
 
-                                        <div className={styles.field}>
-                                            <label className={styles.label2}>Reps: {rep.reps}</label>
-                                        </div>
+                                                    <div className={styles.field}>
+                                                        <label> Weight: {set.weight} </label>
+                                                    </div>
 
-                                        {rep.superset?.map((ss, ssIndex) => (
-                                            <div key={ssIndex} className={styles.supersetRow2}>
-                                                <div className={styles.field}>
-                                                    <label className={styles.label2}>
-                                                        Weight: {ss.weight}
-                                                    </label>
+                                                    <div className={styles.field}>
+                                                        <label> Reps: {set.reps} </label>
+                                                    </div>
                                                 </div>
 
-                                                <div className={styles.field}>
-                                                    <label className={styles.label2}>
-                                                        Reps: {ss.reps}
-                                                    </label>
+                                                <div className={styles.supersetsRow}>
+                                                    {set.superset?.map((ss, ssIndex) => (
+                                                        <div key={ssIndex} className={styles.supersets}>
+                                                            <div className={styles.field}>
+                                                                <label className={styles.label2}>
+                                                                    Lift: {ss.exercise_id}
+                                                                </label>
+                                                            </div>
+
+                                                            <div className={styles.field}>
+                                                                <label className={styles.label2}>
+                                                                    Weight: {ss.weight}
+                                                                </label>
+                                                            </div>
+
+                                                            <div className={styles.field}>
+                                                                <label className={styles.label2}>
+                                                                    Reps: {ss.reps}
+                                                                </label>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                ))}
-                            </div>
-                        )))}
+                                )
+                            )))}
+                        </div>
+                    )}
+
+                    <div className={styles.controlButtons}>
+                        <button className={styles.completeButton}>Completed Lift</button>
+
+                        <button className={styles.removeButton2} onClick={() => {
+                            localStorage.removeItem("trackedWorkout")
+                            sessionStorage.removeItem("lift")
+                            setWorkout(NoWorkout)
+                            navigate("/")
+                        }}>Cancel Lift</button>
                     </div>
                 </div>
             </main>
@@ -407,7 +501,7 @@ export function Track({ workout, setWorkout } : { workout: TrackedWorkout } & Se
     )
 }
 
-export function Tracker({ account }: { account: AccountData }) {
+export function Tracker({account}: { account: AccountData }) {
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -415,7 +509,7 @@ export function Tracker({ account }: { account: AccountData }) {
     }, [navigate, account]);
 
     return (
-        <Outlet />
+        <Outlet/>
     )
 }
 
@@ -457,7 +551,7 @@ export function ExerciseSearch() {
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo} />
+                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>
@@ -466,7 +560,7 @@ export function ExerciseSearch() {
 
                 <div className={homeStyles.headerRight}>
                     <button className={homeStyles.accountIcon} onClick={() => navigate("/")} title="Home">
-                        <Home size={20} color="#f5f5f5" strokeWidth={2} />
+                        <Home size={20} color="#f5f5f5" strokeWidth={2}/>
                     </button>
                 </div>
             </header>
@@ -518,7 +612,7 @@ export function ExerciseSearch() {
                                 checked={showImages}
                                 onChange={e => setShowImages(e.target.checked)}
                             />
-                            <span className={styles.slider} />
+                            <span className={styles.slider}/>
                         </label>
                     </div>
 
@@ -531,7 +625,7 @@ export function ExerciseSearch() {
                         />
 
                         <div className={styles.pills}>
-                                {muscleCategories.map(tag => (
+                            {muscleCategories.map(tag => (
                                 <button
                                     key={tag}
                                     className={`${styles.pill} ${filters.includes(tag) ? styles.active : ""}`}
@@ -556,7 +650,7 @@ export function ExerciseSearch() {
                             rowCount={results.length}
                             rowHeight={420}
                             rowComponent={ExerciseCard}
-                            rowProps={{ navigate, results, showImages, selected, setSelected }}
+                            rowProps={{navigate, results, showImages, selected, setSelected}}
                         />
                         {results.length === 0 && (
                             <p className={styles.noResults}>No exercises found</p>
@@ -568,7 +662,13 @@ export function ExerciseSearch() {
     )
 }
 
-function ExerciseCard({ navigate, index, results, showImages, selected, setSelected }: RowComponentProps<{ navigate: NavigateFunction, results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: Dispatch<SetStateAction<string | null>> }>) {
+function ExerciseCard({navigate, index, results, showImages, selected, setSelected}: RowComponentProps<{
+    navigate: NavigateFunction,
+    results: ExerciseDB[],
+    showImages: boolean,
+    selected: string | null,
+    setSelected: Dispatch<SetStateAction<string | null>>
+}>) {
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
     const [expanded, setExpanded] = useState(false);
@@ -583,7 +683,7 @@ function ExerciseCard({ navigate, index, results, showImages, selected, setSelec
     };
 
     const handleConfirm = () => {
-        navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, { state: { exercise: exercise.name } });
+        navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, {state: {exercise: exercise.name}});
     }
 
     return (
@@ -614,6 +714,8 @@ function ExerciseCard({ navigate, index, results, showImages, selected, setSelec
                         src={images.start}
                         loading="lazy"
                         decoding="async"
+                        width={750}
+                        height={500}
                         alt={exercise.name}
                         className={styles.exerciseImage}
                     />
@@ -622,7 +724,7 @@ function ExerciseCard({ navigate, index, results, showImages, selected, setSelec
 
             <div className={styles.metaRow}>
                 <span><strong>Level:</strong> {capitalize(exercise.level)}</span>
-                <span><strong>Equipment:</strong> {capitalize(exercise.equipment)}</span>
+                <span><strong>Equipment:</strong> {exercise.equipment !== null ? capitalize(exercise.equipment) : "None"}</span>
             </div>
 
             <ul className={`${styles.instructions} ${expanded ? styles.expanded : ""}`}>

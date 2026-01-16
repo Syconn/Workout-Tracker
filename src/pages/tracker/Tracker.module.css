@@ -26,7 +26,7 @@
     margin: 0 auto;
     background: #333232;
     border-radius: 14px;
-    padding: 8px 18px 20px;
+    padding: 25px 18px 20px;
     box-shadow: 0 8px 20px rgba(51, 50, 50, 0.35);
     display: flex;
     flex-direction: column;
@@ -175,9 +175,9 @@
 
 .heading {
     text-align: center;
-    margin-bottom: 1.5rem;
     font-size: 1.6rem;
-    font-weight: 700;
+    font-weight: bold;
+    color: lightgray;
 }
 
 .heading2 {
@@ -204,6 +204,7 @@
     transition: transform 0.2s ease, background-color 0.2s ease;
 }
 
+.completeButton,
 .removeButton,
 .removeButton2 {
     margin-top: 0.5rem;
@@ -229,6 +230,17 @@
     margin: 1.5rem auto auto;
 }
 
+.completeButton {
+    background-color: #22c55e;
+    color: #062e16;
+
+    display: flex;
+    justify-content: center;
+    width: 200px;
+    margin: 1.5rem auto auto;
+}
+
+.completeButton:hover:enabled,
 .trackButton:hover:enabled {
     background-color: #16a34a;
     transform: translateY(-2px);
@@ -249,6 +261,13 @@
 .autocomplete {
     position: relative;
     flex: 1;
+}
+
+.autocomplete2 {
+    margin-top: 25px;
+    position: relative;
+
+    /*flex: 1;*/
 }
 
 .suggestions {
@@ -371,6 +390,20 @@
     border-radius: 12px;
     padding: 14px 16px;
     font-size: 1rem;
+
+    width: 100%;
+    box-sizing: border-box;
+
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.selectorInput2 {
+    background: linear-gradient(180deg, #121212, #0d0d0d);
+    color: #f5f5f5;
+    border: 1px solid #2a2a2a;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 0.75rem;
 
     width: 100%;
     box-sizing: border-box;
@@ -611,7 +644,48 @@ h1 {
     background: #1f1f1f;
     padding: 16px;
     border-radius: 14px;
+    margin-bottom: 18px;
+}
+
+.repIndex {
     text-align: center;
+    font-size: 20px;
+    padding-top: 22px;
+    padding-right: 8px;
+    color: #e3dede;
+}
+
+.supersetButtons {
+    margin-top: 10px;
+}
+
+.supersetButtons2 {
+    margin-top: 14px;
+}
+
+.headerDone {
+    display: flex;
+    align-items: center;     /* vertical centering */
+    justify-content: center; /* center content */
+    position: relative;     /* allows absolute positioning */
+}
+
+.supersetsRow {
+    margin-top: 12px;
+    margin-left: 30px;
+}
+
+.supersets {
+    display: flex;
+    gap: 8px;
+    margin-left: 48px;
+    margin-top: 4px;
+    padding-bottom: 20px;
+}
+
+.controlButtons {
+    display: flex;
+    gap: 8px;
 }
 
 .repRow,
@@ -619,8 +693,11 @@ h1 {
 .repRow2,
 .supersetRow2 {
     display: flex;
+    flex-basis: 100%;
     gap: 8px;
-    margin-bottom: 8px;
+    margin-left: 24px;
+    /*flex-direction: column;*/
+    /*margin-bottom: 8px;*/
 }
 
 .repRow2,
@@ -630,6 +707,7 @@ h1 {
 
 .repRow input,
 .supersetRow input,
+.supersets input,
 .repRow select {
     flex: 1;
     padding: 8px;
@@ -644,15 +722,35 @@ h1 {
     opacity: 0.9;
 }
 
+.remButtonRec {
+    position: absolute;
+    right: 0;
+}
+
+.compButtonRec {
+    position: absolute;
+    right: 5rem;
+    margin-bottom: 2px;
+}
+
+.remButtonRec,
 .remButton {
     background-color: #7c1212;
+}
+
+.compButtonRec,
+.compButton {
+    background-color: #2b42b9;
 }
 
 .addButton {
     background: #22c55e;
 }
 
+.compButtonRec,
+.compButton,
 .remButton,
+.remButtonRec,
 .addButton {
     margin-top: 8px;
     padding: 8px 12px;
@@ -669,6 +767,10 @@ h1 {
 }
 
 .field {
+    display: inline-flex;
+}
+
+.field2 {
     display: inline-flex;
 }
 
