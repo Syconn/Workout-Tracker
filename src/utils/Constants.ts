@@ -31,11 +31,6 @@ export const NoAccount: AccountData = {
     accessToken: "",
 }
 
-export type SerializedWorkouts = Omit<Workouts, "lastLifted" | "recordLift"> & {
-    lastLifted: [string, [number, number]][]
-    recordLift: [string, [number, number, number]][]
-}
-
 export const NoWorkout: TrackedWorkout = {
     date: new Date(0, 0, 0),
     lifts: [],

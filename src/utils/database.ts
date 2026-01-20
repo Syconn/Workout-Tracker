@@ -1,5 +1,5 @@
 import Dexie, { Table } from "dexie"
-import { Workouts } from "./types"
+import {Workouts} from "../pages/tracker/Tracker.tsx";
 
 export type WorkoutsRecord = {
     id: string
@@ -18,34 +18,3 @@ class WorkoutDB extends Dexie {
 }
 
 export const DB = new WorkoutDB()
-
-
-// replaces loading
-// const [workouts, setWorkoutProp] = useTypeState<Workouts>(NoSavedWorkouts)
-//
-// useEffect(() => {
-//     let cancelled = false
-//
-//     async function loadWorkouts() {
-//         const record = await workoutDB.workouts.get("main")
-//         if (!record || cancelled) return
-//
-//         setWorkoutProp(record.data)
-//     }
-//
-//     loadWorkouts()
-//
-//     return () => {
-//         cancelled = true
-//     }
-// }, [])
-
-//replaces saving
-// useEffect(() => {
-//     if (workouts === NoSavedWorkouts) return
-//
-//     workoutDB.workouts.put({
-//         id: "main",
-//         data: workouts
-//     })
-// }, [workouts])

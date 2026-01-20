@@ -1,6 +1,6 @@
 import './App.css'
 import {useEffect, useState} from "react";
-import {NoAccount, NoSavedWorkouts, NoWorkout, Pages, SerializedWorkouts} from "./utils/Constants.ts";
+import {NoAccount, NoSavedWorkouts, NoWorkout, Pages} from "./utils/Constants.ts";
 import HomeMenu from "./pages/home/Home.tsx";
 import {
 	AccountData,
@@ -34,7 +34,7 @@ function App() {
 		return local ? JSON.parse(local) : NoWorkout
 	})
 
-	const [workouts, setWorkoutProp] = useState<Workouts>(NoSavedWorkouts)
+	const [workouts, setWorkoutProp, setWorkouts] = useTypeState<Workouts>(NoSavedWorkouts)
 
 	useEffect(() => {
 		let cancelled = false
@@ -42,16 +42,15 @@ function App() {
 		async function loadWorkouts() {
 			const record = await DB.workouts.get("main")
 			if (!record || cancelled) return
-
-			setWorkoutProp(record.data)
+			setWorkouts(record.data)
 		}
 
-		loadWorkouts()
+		void loadWorkouts()
 
 		return () => {
 			cancelled = true
 		}
-	}, [])
+	}, [setWorkouts])
 
 	useEffect(() => {
 		if (trackedWorkout != NoWorkout) localStorage.setItem("trackedWorkout", JSON.stringify(trackedWorkout))
@@ -73,6 +72,8 @@ function App() {
 	}, [workouts])
 
 	const saveWorkout = () => {
+		setTrackedWorkoutProp("workout_length_minutes", Math.round(Math.abs(trackedWorkout.date.getTime() - new Date().getTime()) / 60000))
+
 		const prev = structuredClone(workouts.workouts)
 		prev.push(trackedWorkout)
 		setWorkoutProp("workouts", prev)
