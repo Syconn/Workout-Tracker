@@ -1,12 +1,12 @@
 Customize logout popups
 
-Auto fill for user information for save password and username
+Autofill for user information for save password and username
 
-use database
+Add Workout History Func, and Check Progress Graph
 
-Fix refresh spaming logging out
+Fix refresh spacing logging out
 
-Just use Tracker Json data an put in json square, don't need readiblility
+Just use Tracker Json data an put in json square, don't need readability
 
 Save and Load Workout Data
 
