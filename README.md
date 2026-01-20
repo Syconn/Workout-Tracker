@@ -4,6 +4,10 @@
 
 A place to log your workouts for free online in a clean and simple UI, removing the need for boring spreadsheets or note sheets. Would love to add database support to share data between different user clients
 
+### Planned
+
+Add show workout history button functionality and progress functionality. No longer rely on browser data for storing workouts and use the website DB previously implemented. Improve data handling with the website.
+
 ### Libraries
 * exercises.json (Workout data)
 * react-router (Hash Routing)

@@ -179,7 +179,8 @@ export function Track({workout, pastWorkout, setWorkoutProp, setWorkout, saveWor
         const copy = structuredClone(workout.lifts);
         const rep = copy[liftIndex]
 
-        rep.set.push({weight: 0, reps: 0, superset: []});
+        const weight = rep.set.length > 0 ? rep.set[rep.set.length - 1].weight : 0;
+        rep.set.push({weight: weight, reps: 0, superset: []});
         setWorkoutProp("lifts", copy);
     };
 
@@ -206,7 +207,9 @@ export function Track({workout, pastWorkout, setWorkoutProp, setWorkout, saveWor
         const rep = copy[liftIndex].set[setIndex];
 
         if (!rep.superset) rep.superset = [];
-        rep.superset.push({weight: 0, reps: 0, exercise_id: copy[liftIndex].exercise_id});
+        const weight = rep.superset.length > 0 ? rep.superset[rep.superset.length - 1].weight : 0
+        const liftId = rep.superset.length > 0 ? rep.superset[rep.superset.length - 1].exercise_id : copy[liftIndex].exercise_id
+        rep.superset.push({weight: weight, reps: 0, exercise_id: liftId});
         setWorkoutProp("lifts", copy);
     };
 

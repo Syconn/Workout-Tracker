@@ -72,7 +72,8 @@ function App() {
 	}, [workouts])
 
 	const saveWorkout = () => {
-		setTrackedWorkoutProp("workout_length_minutes", Math.round(Math.abs(trackedWorkout.date.getTime() - new Date().getTime()) / 60000))
+		const date = trackedWorkout.date instanceof Date ? trackedWorkout.date : new Date(trackedWorkout.date)
+		setTrackedWorkoutProp("workout_length_minutes", Math.round(Math.abs(date.getTime() - new Date().getTime()) / 60000))
 
 		const prev = structuredClone(workouts.workouts)
 		prev.push(trackedWorkout)
