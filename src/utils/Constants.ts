@@ -1,5 +1,5 @@
 import {AccountData} from "../pages/accounts/AccountManager.tsx";
-import {TrackedWorkout} from "../pages/tracker/Tracker.tsx";
+import {TrackedWorkout, Workouts} from "../pages/tracker/Tracker.tsx";
 
 export const Pages = {
     HomePage: "/",
@@ -31,11 +31,22 @@ export const NoAccount: AccountData = {
     accessToken: "",
 }
 
+export type SerializedWorkouts = Omit<Workouts, "lastLifted" | "recordLift"> & {
+    lastLifted: [string, [number, number]][]
+    recordLift: [string, [number, number, number]][]
+}
+
 export const NoWorkout: TrackedWorkout = {
     date: new Date(0, 0, 0),
     lifts: [],
     type: "",
     workout_length_minutes: 0,
+}
+
+export const NoSavedWorkouts: Workouts = {
+    workouts: [],
+    lastLifted: new Map<string, [number, number]>(),
+    recordLift: new Map<string, [number, number, number]>()
 }
 
 export const Muscles= ['abdominals', 'hamstrings', 'calves', 'shoulders', 'adductors', 'glutes', 'quadriceps', 'biceps', 'forearms', 'abductors', 'triceps', 'chest', 'lower back', 'traps', 'middle back', 'lats', 'neck']

@@ -2,10 +2,15 @@ Customize logout popups
 
 Auto fill for user information for save password and username
 
+use database
+
 Fix refresh spaming logging out
+
+Just use Tracker Json data an put in json square, don't need readiblility
+
+Save and Load Workout Data
 
 Profile System
 - preference system?
 
 API Down System?
-- Could Database workouts for temp memory

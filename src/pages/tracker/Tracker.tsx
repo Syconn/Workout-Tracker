@@ -25,6 +25,12 @@ export type ExerciseDB = {
     images: string[];
 };
 
+export type Workouts = {
+    workouts: TrackedWorkout[]
+    lastLifted: Map<string, [number, number]> // Prevent needing to save two copies
+    recordLift: Map<string, [number, number, number]>
+}
+
 export type TrackedWorkout = {
     type: string;
     date: Date;
@@ -52,6 +58,7 @@ export type Superset = {
 export type SetWorkoutProps = {
     setWorkoutProp: <K extends keyof TrackedWorkout>(key: K, value: TrackedWorkout[K]) => void
     setWorkout: (value: TrackedWorkout) => void
+    saveWorkout: () => void
 }
 
 export function TrackerStart({workout, setWorkoutProp}: { workout: TrackedWorkout } & SetWorkoutProps) {
@@ -119,7 +126,10 @@ export function TrackerStart({workout, setWorkoutProp}: { workout: TrackedWorkou
     )
 }
 
-export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedWorkout } & SetWorkoutProps) {
+export function Track({workout, pastWorkout, setWorkoutProp, setWorkout, saveWorkout}: {
+    workout: TrackedWorkout,
+    pastWorkout: Workouts
+} & SetWorkoutProps) {
     const [open, setOpen] = useState(false);
     const [innerOpen, setInnerOpen] = useState<[number, number, boolean]>([0, 0, false]);
     const [exercise, setExercise] = useState("");
@@ -133,6 +143,9 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
     const navigate = useNavigate();
     const location = useLocation();
     const selectedExercise = location.state?.exercise ?? null;
+    const last = workout.lifts[lift] !== undefined && pastWorkout.lastLifted.has(workout.lifts[lift].exercise_id) ? pastWorkout.lastLifted.get(workout.lifts[lift].exercise_id) : undefined
+    const pr = workout.lifts[lift] !== undefined && pastWorkout.recordLift.has(workout.lifts[lift].exercise_id) ? pastWorkout.recordLift.get(workout.lifts[lift].exercise_id) : undefined
+    const prSet = pr !== undefined ? pastWorkout.workouts[pr[0]].lifts[pr[1]].set[pr[2]] : undefined
 
     const fuse = new Fuse(exerciseNames, {
         threshold: 0.15,
@@ -166,7 +179,7 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
         const copy = structuredClone(workout.lifts);
         const rep = copy[liftIndex]
 
-        rep.set.push({ weight: 0, reps: 0, superset: [] });
+        rep.set.push({weight: 0, reps: 0, superset: []});
         setWorkoutProp("lifts", copy);
     };
 
@@ -193,7 +206,7 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
         const rep = copy[liftIndex].set[setIndex];
 
         if (!rep.superset) rep.superset = [];
-        rep.superset.push({ weight: 0, reps: 0, exercise_id: copy[liftIndex].exercise_id });
+        rep.superset.push({weight: 0, reps: 0, exercise_id: copy[liftIndex].exercise_id});
         setWorkoutProp("lifts", copy);
     };
 
@@ -299,7 +312,7 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                                 {/* Modify Selected Workout */}
                                 {pickExercise && (
                                     <div className={styles.setCard}>
-                                        <h4>{exercise} Lift</h4>
+                                        <h4>{workout.lifts[lift].exercise_id}</h4>
 
                                         {workout.lifts[lift] !== undefined && workout.lifts[lift].set.map((set, setIndex) => (
                                             <div key={setIndex}>
@@ -333,15 +346,18 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                                                     </div>
 
                                                     <div className={styles.supersetButtons}>
-                                                        <button onClick={() => addSuperset(lift, setIndex)} className={styles.addButton}>Add Superset</button>
-                                                        <button onClick={() => remSet(lift, setIndex)} className={styles.remButton}>Remove</button>
+                                                        <button onClick={() => addSuperset(lift, setIndex)}
+                                                                className={styles.addButton}>Add Superset
+                                                        </button>
+                                                        <button onClick={() => remSet(lift, setIndex)}
+                                                                className={styles.remButton}>Remove
+                                                        </button>
                                                     </div>
                                                 </div>
 
                                                 <div className={styles.supersetsRow}>
                                                     {set.superset?.map((ss, ssIndex) => (
                                                         <div key={ssIndex} className={styles.supersets}>
-
                                                             <div className={styles.autocomplete2}>
                                                                 <input
                                                                     className={styles.selectorInput2}
@@ -399,7 +415,10 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                                                             </div>
 
                                                             <div className={styles.supersetButtons2}>
-                                                                <button onClick={() => remSuperset(lift, setIndex, ssIndex)} className={styles.remButton}>Remove</button>
+                                                                <button
+                                                                    onClick={() => remSuperset(lift, setIndex, ssIndex)}
+                                                                    className={styles.remButton}>Remove
+                                                                </button>
                                                             </div>
                                                         </div>
                                                     ))}
@@ -408,19 +427,111 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                                         ))}
 
                                         <div className={styles.supersetButtons2}>
-                                            <button onClick={() => addSet(lift)} className={styles.addButton}>Add Set</button>
+                                            <button onClick={() => addSet(lift)} className={styles.addButton}>Add Set
+                                            </button>
                                             <button onClick={() => {
                                                 setLift(-1)
                                                 setAdding(false)
                                                 pickedExercise(false)
                                                 setExercise("")
-                                            }} className={styles.compButton}>Done</button>
+                                            }} className={styles.compButton}>Done
+                                            </button>
                                         </div>
                                     </div>
                                 )}
                             </div>
                         )}
                     </div>
+
+                    {last !== undefined && (
+                        <div className={styles.innerCard}>
+                            <h2 className={styles.heading2}>Last Time</h2>
+
+                            <div className={styles.setCard2}>
+                                {pastWorkout.workouts[last[0]].lifts[last[1]].set.map(((set, setIndex) => (
+                                    <div key={setIndex}>
+                                        <div className={styles.repRow}>
+                                            <label> Set {setIndex + 1} |</label>
+
+                                            <div className={styles.field}>
+                                                <label> Weight: {set.weight} </label>
+                                            </div>
+
+                                            <div className={styles.field}>
+                                                <label> Reps: {set.reps} </label>
+                                            </div>
+                                        </div>
+
+                                        <div className={styles.supersetsRow}>
+                                            {set.superset?.map((ss, ssIndex) => (
+                                                <div key={ssIndex} className={styles.supersets}>
+                                                    <div className={styles.field}>
+                                                        <label className={styles.label2}>
+                                                            Lift: {ss.exercise_id}
+                                                        </label>
+                                                    </div>
+
+                                                    <div className={styles.field}>
+                                                        <label className={styles.label2}>
+                                                            Weight: {ss.weight}
+                                                        </label>
+                                                    </div>
+
+                                                    <div className={styles.field}>
+                                                        <label className={styles.label2}>
+                                                            Reps: {ss.reps}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )))}
+                            </div>
+                        </div>
+                    )}
+
+                    {pr !== undefined && prSet !== undefined && (
+                        <div className={styles.innerCard}>
+                            <h2 className={styles.heading2}>Personal Record</h2>
+
+                            <div className={styles.setCard2}>
+                                <div className={styles.repRow}>
+                                    <div className={styles.field}>
+                                        <label> Weight: {prSet.weight} </label>
+                                    </div>
+
+                                    <div className={styles.field}>
+                                        <label> Reps: {prSet.reps} </label>
+                                    </div>
+                                </div>
+
+                                <div className={styles.supersetsRow}>
+                                    {prSet.superset?.map((ss, ssIndex) => (
+                                        <div key={ssIndex} className={styles.supersets}>
+                                            <div className={styles.field}>
+                                                <label className={styles.label2}>
+                                                    Lift: {ss.exercise_id}
+                                                </label>
+                                            </div>
+
+                                            <div className={styles.field}>
+                                                <label className={styles.label2}>
+                                                    Weight: {ss.weight}
+                                                </label>
+                                            </div>
+
+                                            <div className={styles.field}>
+                                                <label className={styles.label2}>
+                                                    Reps: {ss.reps}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     {/* Recorded Workouts */}
                     {((workout.lifts.length > 0 && !adding) || (workout.lifts.length > 1)) && (
@@ -433,11 +544,15 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                                         <div className={styles.headerDone}>
                                             <h4>{value.exercise_id}</h4>
                                             <button onClick={() => {
+                                                console.log(pastWorkout.lastLifted)
                                                 pickedExercise(true)
                                                 setAdding(true)
                                                 setLift(index)
-                                            }} className={styles.compButtonRec}>Edit</button>
-                                            <button onClick={() => remLift(index)} className={styles.remButtonRec}>Remove</button>
+                                            }} className={styles.compButtonRec}>Edit
+                                            </button>
+                                            <button onClick={() => remLift(index)}
+                                                    className={styles.remButtonRec}>Remove
+                                            </button>
                                         </div>
 
                                         {value.set.map((set, setIndex) => (
@@ -486,14 +601,18 @@ export function Track({workout, setWorkoutProp, setWorkout}: { workout: TrackedW
                     )}
 
                     <div className={styles.controlButtons}>
-                        <button className={styles.completeButton}>Completed Lift</button>
+                        <button className={styles.completeButton} onClick={() => {
+                            saveWorkout()
+                            navigate("/")
+                        }}>Completed Lift</button>
 
                         <button className={styles.removeButton2} onClick={() => {
                             localStorage.removeItem("trackedWorkout")
                             sessionStorage.removeItem("lift")
                             setWorkout(NoWorkout)
                             navigate("/")
-                        }}>Cancel Lift</button>
+                        }}>Cancel Lift
+                        </button>
                     </div>
                 </div>
             </main>
