@@ -1,8 +1,6 @@
-import { API } from '../config.ts';
-
 export async function postRequest(route: string, body: Record<string, string | number> = {}) { // Routes result in CORS issues
     try {
-        const res = await fetch(`${API}`, {
+        const res = await fetch(`https://script.google.com/macros/s/AKfycbwR32HZDJAnN35aIsOFSdUKdrteL-AO9rtS96t0ehIgHUJstYuINpJWuMDPW_FLeRxRAw/exec`, {
             redirect: "follow",
             method: "POST",
             headers: { "Content-Type": "text/plain",},
