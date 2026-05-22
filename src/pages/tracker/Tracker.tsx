@@ -33,7 +33,7 @@ export type Workouts = {
 
 export type TrackedWorkout = {
     type: string;
-    date: Date;
+    date: Date | string;
     workout_length_minutes: number;
     lifts: Lift[]
 }
