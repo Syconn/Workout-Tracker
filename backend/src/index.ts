@@ -13,17 +13,12 @@ import statusRoutes from "./routes/statusRoutes.js";
 import userRoute from "./routes/userRoutes.js";
 
 dotenv.config()
-
 const app = express();
 const server = createServer(app);
 
 await initDB();
 
-app.use(cors({
-    origin: "http://localhost:5128",
-    credentials: true
-}))
-
+app.use(cors({ origin: "http://localhost:5128", credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use("/auth", authRoutes);

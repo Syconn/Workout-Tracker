@@ -1,13 +1,15 @@
-import {Outlet, useNavigate} from "react-router-dom";
+import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import {useEffect} from "react";
 import {Pages} from "../utils/constants.ts";
 
 function Home({loggedIn}: { loggedIn: boolean | null }) {
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         if (loggedIn === false) navigate(Pages.AccountManager);
-    }, [loggedIn, navigate]);
+        if (location.pathname === "/") navigate(Pages.Home);
+    });
 
     return <Outlet />
 }
