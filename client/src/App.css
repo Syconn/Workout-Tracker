@@ -11,3 +11,9 @@ html, body, #root {
     width: 100%;
     overflow-x: hidden;
 }
+
+@media (max-width: 640px) {
+    html {
+        font-size: 18px;
+    }
+}

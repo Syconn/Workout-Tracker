@@ -1,16 +1,11 @@
-import {AccountData} from "../accounts/AccountManager.tsx";
-import styles from "./Home.module.css";
-import {NoAccount, Pages} from "../../utils/Constants.ts";
+import styles from "../styles/Home.module.css";
 import {useNavigate} from "react-router-dom";
-import {useEffect} from "react";
 import {User} from "lucide-react";
+import {Pages} from "../utils/constants.ts";
+import {UserData} from "../network/networkData.ts";
 
-function HomeMenu({ account }: { account: AccountData }) {
+function HomeMenu({ userData}: { userData: UserData }) {
     const navigate = useNavigate();
-
-    useEffect(() => {
-        if (account === NoAccount) navigate(`${Pages.AccountManager}`)
-    }, [navigate, account]);
 
     return (
         <div className={styles.page}>
@@ -25,7 +20,7 @@ function HomeMenu({ account }: { account: AccountData }) {
 
                 <div className={styles.headerRight}>
                     <button onClick={() => navigate(Pages.ProfilePage)} className={styles.accountIcon}>
-                        <User size={20} color="#f5f5f5" strokeWidth={2} />
+                        <User size={20} color="#f5f5f5" strokeWidth={2}/>
                     </button>
                 </div>
             </header>
@@ -34,13 +29,14 @@ function HomeMenu({ account }: { account: AccountData }) {
                 <section className={styles.homeHeader}>
                     <h2>
                         Welcome back,{" "}
-                        <span className={styles.userName}>{account.name} </span> 💪
+                        <span className={styles.userName}>{userData.name} </span> 💪
                     </h2>
                     <p>Ready to crush today’s workout?</p>
                 </section>
 
                 <section className={styles.homeActions}>
-                    <button onClick={() => navigate(Pages.TrackerPage)} className={`${styles.homeButton} ${styles.primary}`}>
+                    <button onClick={() => navigate(Pages.TrackerPage)}
+                            className={`${styles.homeButton} ${styles.primary}`}>
                         Start Workout
                     </button>
 

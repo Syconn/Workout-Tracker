@@ -10,6 +10,7 @@ import {initDB} from "./config/database.js";
 import authRoutes from "./routes/authRoute.js";
 import {jwtSecret, port} from "./config/keys.js";
 import statusRoutes from "./routes/statusRoutes.js";
+import userRoute from "./routes/userRoutes.js";
 
 dotenv.config()
 
@@ -27,6 +28,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use("/auth", authRoutes);
 app.use("/status", statusRoutes);
+app.use("/user", userRoute);
 
 const io = new Server(server, {
     cors: {
@@ -46,14 +48,6 @@ io.use((socket, next) => {
     } catch {
         next(new Error("Unauthorized"));
     }
-});
-
-io.on("connection", (socket) => { /// TODO TEST
-    console.log("User connected:", socket.data.user.username);
-
-    // socket.on("join-game", () => {
-    //     console.log(socket.data.user.username, "joined game queue");
-    // });
 });
 
 server.listen(port(), () => {

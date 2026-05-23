@@ -1,11 +1,11 @@
-import {AccountData} from "../pages/accounts/AccountManager.tsx";
-import {TrackedWorkout, Workouts} from "../pages/tracker/Tracker.tsx";
+export const URL = import.meta.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4000';
 
 export const Pages = {
-    HomePage: "/",
-    ProfilePage: "/profile",
+    Main: "/",
     AccountManager: "/account",
-    TrackerPage: "/tracker",
+    Home: "/home",
+    ProfilePage: "/profile",
+    TrackerPage: "tracker",
     StartPage: "start",
     TrackPage: "track",
     LoginPage: "login",
@@ -14,35 +14,18 @@ export const Pages = {
     ForgotPage: "forgot",
 }
 
-export const Requests = {
-    CreateAccount: "createAccount",
-    ValidateUsername: "validateUsername",
-    SignIn: "signIn",
-    ForgotPassword: "forgotPassword",
-    ResetPassword: "resetPassword",
-    Form: "form",
-    ValidSession: "validSession",
-    ModifyForm: "modifyForm"
-}
-
-export const NoAccount: AccountData = {
-    id: -1,
-    name: "",
-    accessToken: "",
-}
-
-export const NoWorkout: TrackedWorkout = {
-    date: new Date(0, 0, 0),
-    lifts: [],
-    type: "",
-    workout_length_minutes: 0,
-}
-
-export const NoSavedWorkouts: Workouts = {
-    workouts: [],
-    lastLifted: new Map<string, [number, number]>(),
-    recordLift: new Map<string, [number, number, number]>()
-}
+// export const NoWorkout: TrackedWorkout = {
+//     date: new Date(0, 0, 0),
+//     lifts: [],
+//     type: "",
+//     workout_length_minutes: 0,
+// }
+//
+// export const NoSavedWorkouts: Workouts = {
+//     workouts: [],
+//     lastLifted: new Map<string, [number, number]>(),
+//     recordLift: new Map<string, [number, number, number]>()
+// }
 
 export const Muscles= ['abdominals', 'hamstrings', 'calves', 'shoulders', 'adductors', 'glutes', 'quadriceps', 'biceps', 'forearms', 'abductors', 'triceps', 'chest', 'lower back', 'traps', 'middle back', 'lats', 'neck']
 export const Equipment = ['body only', 'machine', 'other', 'foam roll', 'kettlebells', 'dumbbell', 'cable', 'barbell', 'bands', 'medicine ball', 'exercise ball', 'e-z curl bar']
