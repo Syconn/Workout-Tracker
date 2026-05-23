@@ -1,7 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import {getDB} from "../config/database.js";
 import {jwtSecret} from "../config/keys.js";
+import {getDB} from "../database/database.js";
 
 export async function validateUsername(username: string) {
     const db = getDB();

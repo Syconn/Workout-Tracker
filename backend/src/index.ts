@@ -6,17 +6,20 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
-import {initDB} from "./config/database.js";
 import authRoutes from "./routes/authRoute.js";
 import {jwtSecret, port} from "./config/keys.js";
 import statusRoutes from "./routes/statusRoutes.js";
 import userRoute from "./routes/userRoutes.js";
+import {initDB} from "./database/database.js";
+import {seedWorkoutsIfEmpty} from "./database/importWorkouts.js";
+import apiRoute from "./routes/apiRoute.js";
 
 dotenv.config()
 const app = express();
 const server = createServer(app);
 
 await initDB();
+await seedWorkoutsIfEmpty();
 
 app.use(cors({ origin: "http://localhost:5128", credentials: true }))
 app.use(express.json())
@@ -24,6 +27,7 @@ app.use(cookieParser())
 app.use("/auth", authRoutes);
 app.use("/status", statusRoutes);
 app.use("/user", userRoute);
+app.use("/api", apiRoute);
 
 const io = new Server(server, {
     cors: {
