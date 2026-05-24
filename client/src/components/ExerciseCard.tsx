@@ -1,26 +1,21 @@
-function ExerciseCard({navigate, index, results, showImages, selected, setSelected}: RowComponentProps<{
-    navigate: NavigateFunction,
-    results: ExerciseDB[],
-    showImages: boolean,
-    selected: string | null,
-    setSelected: Dispatch<SetStateAction<string | null>>
-}>) {
+import {capitalize, getExerciseImage} from "../utils/util.ts";
+import {useNavigate} from "react-router-dom";
+import {ExerciseDB, Pages} from "../utils/data.ts";
+import {RowComponentProps} from 'react-window';
+import {useState} from "react";
+import styles from "../styles/Tracker.module.css";
+
+function ExerciseCard({index, results, showImages, selected, setSelected}: RowComponentProps<{ results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: (val: string | null) => void }>) {
+    const [expanded, setExpanded] = useState(false);
+
     const exercise = results[index];
     const images = getExerciseImage(exercise.images);
-    const [expanded, setExpanded] = useState(false);
     const previewSteps = exercise.instructions.slice(0, 3);
     const hiddenSteps = exercise.instructions.length - previewSteps.length;
     const isSelected = selected === exercise.name;
-
-    const toggleSelect = () => {
-        setSelected(prev =>
-            prev === exercise.name ? null : exercise.name
-        );
-    };
-
-    const handleConfirm = () => {
-        navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, {state: {exercise: exercise.name}});
-    }
+    const navigate = useNavigate();
+    const toggleSelect = () => setSelected(selected === exercise.name ? null : exercise.name);
+    const handleConfirm = () => navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, {state: {exercise: exercise.name}});
 
     return (
         <div
@@ -45,17 +40,7 @@ function ExerciseCard({navigate, index, results, showImages, selected, setSelect
             </div>
 
             <div className={styles.imageWrapper}>
-                {showImages && (
-                    <img
-                        src={images.start}
-                        loading="lazy"
-                        decoding="async"
-                        width={750}
-                        height={500}
-                        alt={exercise.name}
-                        className={styles.exerciseImage}
-                    />
-                )}
+                {showImages && <img src={images.start} loading="lazy" decoding="async" width={750} height={500} alt={exercise.name} className={styles.exerciseImage}/>}
             </div>
 
             <div className={styles.metaRow}>
@@ -64,9 +49,7 @@ function ExerciseCard({navigate, index, results, showImages, selected, setSelect
             </div>
 
             <ul className={`${styles.instructions} ${expanded ? styles.expanded : ""}`}>
-                {(expanded ? exercise.instructions : previewSteps).map((step, i) => (
-                    <li key={i}>{step}</li>
-                ))}
+                {(expanded ? exercise.instructions : previewSteps).map((step, i) => <li key={i}>{step}</li>)}
             </ul>
 
             {exercise.instructions.length > 3 && (
@@ -83,3 +66,5 @@ function ExerciseCard({navigate, index, results, showImages, selected, setSelect
         </div>
     );
 }
+
+export default ExerciseCard;

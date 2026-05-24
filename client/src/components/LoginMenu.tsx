@@ -4,7 +4,7 @@ import {loginClient} from "../network/authRequests.ts";
 import {Eye, EyeOff, Loader2, Lock, User} from "lucide-react";
 import {motion} from "framer-motion";
 import {Link} from "react-router-dom";
-import {Pages} from "../utils/constants.ts";
+import {Pages} from "../utils/data.ts";
 
 function LoginMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void }) {
     const [username, setUsername] = useState("");

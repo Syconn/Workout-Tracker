@@ -1,5 +1,48 @@
 export const URL = import.meta.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4000';
 
+export type ExerciseDB = {
+    name: string;
+    force: string;
+    level: string;
+    mechanic: string;
+    equipment: string;
+    primaryMuscles: string[];
+    secondaryMuscles: string[];
+    instructions: string[];
+    category: string;
+    images: string[];
+};
+
+// export type Workouts = {
+//     workouts: TrackedWorkout[]
+//     lastLifted: Map<string, [number, number]> // Prevent needing to save two copies
+//     recordLift: Map<string, [number, number, number]>
+// }
+
+export type TrackedWorkout = {
+    type: string;
+    date: Date | string;
+    workout_length_minutes: number;
+    lifts: Lift[]
+}
+
+export type Lift = {
+    exercise_id: string;
+    set: Set[];
+}
+
+export type Set = {
+    weight: number;
+    reps: number;
+    superset?: Superset[]
+}
+
+export type Superset = {
+    exercise_id: string;
+    weight: number;
+    reps: number;
+}
+
 export const Pages = {
     Main: "/",
     AccountManager: "/account",
@@ -14,13 +57,13 @@ export const Pages = {
     ForgotPage: "forgot",
 }
 
-// export const NoWorkout: TrackedWorkout = {
-//     date: new Date(0, 0, 0),
-//     lifts: [],
-//     type: "",
-//     workout_length_minutes: 0,
-// }
-//
+export const NoWorkout: TrackedWorkout = {
+    date: new Date(0, 0, 0),
+    lifts: [],
+    type: "",
+    workout_length_minutes: 0,
+}
+
 // export const NoSavedWorkouts: Workouts = {
 //     workouts: [],
 //     lastLifted: new Map<string, [number, number]>(),

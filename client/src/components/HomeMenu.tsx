@@ -1,7 +1,7 @@
 import styles from "../styles/Home.module.css";
 import {useNavigate} from "react-router-dom";
 import {User} from "lucide-react";
-import {Pages} from "../utils/constants.ts";
+import {Pages} from "../utils/data.ts";
 import {UserData} from "../network/networkData.ts";
 
 function HomeMenu({ userData}: { userData: UserData }) {

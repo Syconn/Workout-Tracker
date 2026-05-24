@@ -1,5 +1,5 @@
 import {ModifyUserData, Registration} from "./networkData.ts";
-import {URL} from "../utils/constants.ts"
+import {URL} from "../utils/data.ts"
 
 export async function loginClient(username: string, password: string, rememberMe: boolean, setLoggedIn: (val: boolean) => void) {
     const res = await fetch(URL + "/auth/login", {

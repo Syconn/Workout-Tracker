@@ -4,7 +4,7 @@ import styles from "../styles/AccountManager.module.css"
 import {Link} from "react-router-dom";
 import {useDebounce} from "../utils/util.ts";
 import {registerClient, validateUsername} from "../network/authRequests.ts";
-import {Pages} from "../utils/constants.ts";
+import {Pages} from "../utils/data.ts";
 
 function RegisterMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void }) {
     const [isUsernameFocused, setIsUsernameFocused] = useState(false);

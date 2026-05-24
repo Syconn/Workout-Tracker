@@ -1,4 +1,4 @@
-import {URL} from "../utils/constants.ts"
+import {URL} from "../utils/data.ts"
 
 export async function userInfo() {
     const res = await fetch(URL + "/user/info", {

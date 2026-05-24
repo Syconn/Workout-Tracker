@@ -1,6 +1,6 @@
 import styles from "../styles/Profile.module.css";
 import homeStyles from "../styles/Home.module.css";
-import {Pages} from "../utils/constants.ts";
+import {Pages} from "../utils/data.ts";
 import {Home} from "lucide-react";
 import {useNavigate} from "react-router-dom";
 import {changePasswordClient, logoutClient} from "../network/authRequests.ts";

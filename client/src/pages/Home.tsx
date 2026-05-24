@@ -1,6 +1,6 @@
 import {Outlet, useLocation, useNavigate} from "react-router-dom";
 import {useEffect} from "react";
-import {Pages} from "../utils/constants.ts";
+import {Pages} from "../utils/data.ts";
 
 function Home({loggedIn}: { loggedIn: boolean | null }) {
     const navigate = useNavigate();
