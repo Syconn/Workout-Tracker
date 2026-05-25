@@ -203,7 +203,7 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                                 )}
 
                                 {/* Modify Selected Workout */}
-                                {pickExercise && (
+                                {pickExercise && workout.lifts[lift] && (
                                     <div className={styles.setCard}>
                                         <h4>{workout.lifts[lift].exercise_id}</h4>
 
