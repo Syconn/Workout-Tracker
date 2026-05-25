@@ -5,7 +5,7 @@ import {Home} from "lucide-react";
 import Fuse from "fuse.js";
 import homeStyles from "../styles/Home.module.css";
 import styles from "../styles/Tracker.module.css";
-import {capitalize} from "../utils/util.ts";
+import {capitalize, useDebounce} from "../utils/util.ts";
 import ExerciseCard from "./ExerciseCard.tsx";
 import {List} from "react-window";
 
@@ -14,26 +14,30 @@ function ExerciseSearch({ workouts, fuse} : { workouts: ExerciseDB[]; fuse: Fuse
     const [muscleCategory, setMuscleCategory] = useState("");
     const [equipment, setEquipment] = useState("");
     const [muscleCategories, setMuscleCategories] = useState<string[]>([]);
-    const [results, setResults] = useState<ExerciseDB[]>(workouts);
     const [filters, setFilters] = useState<string[]>([]);
     const [selected, setSelected] = useState<string | null>(null);
     const [showImages, setShowImages] = useState(false);
 
     const navigate = useNavigate();
+    const debouncedQuery = useDebounce(query, 150);
 
-    useEffect(() => {
-        let filtered = query.trim() ? fuse.search(query).map(r => r.item) : workouts;
-        if (filters.length && muscleCategory !== "") filtered = filtered.filter(ex => {
-            if (!filters.length) return true;
-            return filters.some(f => {
-                if (muscleCategory === "Muscles") return ex.primaryMuscles?.includes(f) || ex.secondaryMuscles?.includes(f);
-                else if (muscleCategory === "Muscle Groups") return MuscleGroups[f as keyof typeof MuscleGroups].some(s => ex.primaryMuscles?.includes(s) || ex.secondaryMuscles?.includes(s))
-                return true;
-            })
-        });
+    const results = useMemo(() => {
+        let filtered = debouncedQuery.trim() ? fuse.search(debouncedQuery).map(r => r.item) : workouts;
+
+        if (filters.length && muscleCategory !== "") {
+            filtered = filtered.filter(ex => {
+                return filters.some(f => {
+                    if (muscleCategory === "Muscles") return ex.primaryMuscles?.includes(f) || ex.secondaryMuscles?.includes(f);
+                    if (muscleCategory === "Muscle Groups") return MuscleGroups[f as keyof typeof MuscleGroups].some(s => ex.primaryMuscles?.includes(s) || ex.secondaryMuscles?.includes(s));
+                    return true;
+                });
+            });
+        }
+
         if (equipment.length) filtered = filtered.filter(ex => ex.equipment?.includes(equipment));
-        setResults(filtered);
-    }, [query, filters, fuse, workouts, muscleCategory, equipment]);
+
+        return filtered;
+    }, [debouncedQuery, filters, fuse, workouts, muscleCategory, equipment]);
 
     useEffect(() => {
         if (muscleCategory === "Muscle Groups") setMuscleCategories(Object.keys(MuscleGroups))
@@ -119,7 +123,7 @@ function ExerciseSearch({ workouts, fuse} : { workouts: ExerciseDB[]; fuse: Fuse
                     }
 
                     <div className={styles.results}>
-                        <List rowCount={results.length} rowHeight={420} rowComponent={ExerciseCard} rowProps={rowProps}/>
+                        <List rowCount={results.length} rowHeight={1} rowComponent={ExerciseCard} rowProps={rowProps}/>
                         {results.length === 0 && <p className={styles.noResults}>No exercises found</p>}
                     </div>
                 </div>

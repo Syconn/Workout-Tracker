@@ -42,7 +42,7 @@ function ExerciseCard({index, results, showImages, selected, setSelected}: RowCo
             </div>
 
             <div className={styles.imageWrapper}>
-                {showImages && <img src={images.start} fetchPriority="low" loading="lazy" decoding="async" alt={exercise.name} className={styles.exerciseImage}/>} {/*//width={750} height={500}*/}
+                {showImages && <img src={images.start} fetchPriority="low" loading="lazy" decoding="async" alt={exercise.name} className={styles.exerciseImage}/>}
             </div>
 
             <div className={styles.metaRow}>
