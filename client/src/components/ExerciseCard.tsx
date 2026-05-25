@@ -2,20 +2,22 @@ import {capitalize, getExerciseImage} from "../utils/util.ts";
 import {useNavigate} from "react-router-dom";
 import {ExerciseDB, Pages} from "../utils/data.ts";
 import {RowComponentProps} from 'react-window';
-import {useState} from "react";
+import {useMemo, useState} from "react";
 import styles from "../styles/Tracker.module.css";
 
 function ExerciseCard({index, results, showImages, selected, setSelected}: RowComponentProps<{ results: ExerciseDB[], showImages: boolean, selected: string | null, setSelected: (val: string | null) => void }>) {
     const [expanded, setExpanded] = useState(false);
 
     const exercise = results[index];
-    const images = getExerciseImage(exercise.images);
     const previewSteps = exercise.instructions.slice(0, 3);
     const hiddenSteps = exercise.instructions.length - previewSteps.length;
     const isSelected = selected === exercise.name;
+
+    const images = useMemo(() => getExerciseImage(exercise.images), [exercise.images]);
+
     const navigate = useNavigate();
     const toggleSelect = () => setSelected(selected === exercise.name ? null : exercise.name);
-    const handleConfirm = () => navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`, {state: {exercise: exercise.name}});
+    const handleConfirm = () => navigate(`/${Pages.TrackerPage}/${Pages.TrackPage}`, {state: {exercise: exercise.name}});
 
     return (
         <div
@@ -40,7 +42,7 @@ function ExerciseCard({index, results, showImages, selected, setSelected}: RowCo
             </div>
 
             <div className={styles.imageWrapper}>
-                {showImages && <img src={images.start} loading="lazy" decoding="async" width={750} height={500} alt={exercise.name} className={styles.exerciseImage}/>}
+                {showImages && <img src={images.start} fetchPriority="low" loading="lazy" decoding="async" alt={exercise.name} className={styles.exerciseImage}/>} {/*//width={750} height={500}*/}
             </div>
 
             <div className={styles.metaRow}>

@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {ExerciseDB, MuscleGroups, Muscles} from "../utils/data.ts";
 import {useNavigate} from "react-router-dom";
 import {Home} from "lucide-react";
@@ -41,11 +41,13 @@ function ExerciseSearch({ workouts, fuse} : { workouts: ExerciseDB[]; fuse: Fuse
         else setMuscleCategories([])
     }, [muscleCategory]);
 
+    const rowProps = useMemo(() => ({results, showImages, selected, setSelected}), [results, showImages, selected]);
+
     return (
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
+                    <img src="/icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>
@@ -117,7 +119,7 @@ function ExerciseSearch({ workouts, fuse} : { workouts: ExerciseDB[]; fuse: Fuse
                     }
 
                     <div className={styles.results}>
-                        <List rowCount={results.length} rowHeight={420} rowComponent={ExerciseCard} rowProps={{results, showImages, selected, setSelected}}/>
+                        <List rowCount={results.length} rowHeight={420} rowComponent={ExerciseCard} rowProps={rowProps}/>
                         {results.length === 0 && <p className={styles.noResults}>No exercises found</p>}
                     </div>
                 </div>

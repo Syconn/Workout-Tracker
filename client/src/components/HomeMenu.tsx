@@ -11,7 +11,7 @@ function HomeMenu({ userData}: { userData: UserData }) {
         <div className={styles.page}>
             <header className={styles.appHeader}>
                 <div className={styles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={styles.logo}/>
+                    <img src="/icon.png" alt="Workout Tracker Logo" className={styles.logo}/>
                 </div>
 
                 <div className={styles.headerCenter}>
@@ -35,7 +35,7 @@ function HomeMenu({ userData}: { userData: UserData }) {
                 </section>
 
                 <section className={styles.homeActions}>
-                    <button onClick={() => navigate(Pages.TrackerPage)}
+                    <button onClick={() => navigate("/" + Pages.TrackerPage)}
                             className={`${styles.homeButton} ${styles.primary}`}>
                         Start Workout
                     </button>

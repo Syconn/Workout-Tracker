@@ -38,7 +38,7 @@ function App() {
 			setUserData(await userInfo())
 		}
 		void loadData()
-	}, [loggedIn]);
+	});
 
 	useEffect(() => {
 		const load = async () => setWorkouts(await loadWorkouts())

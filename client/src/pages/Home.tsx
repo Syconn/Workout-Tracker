@@ -7,6 +7,7 @@ function Home({loggedIn}: { loggedIn: boolean | null }) {
     const location = useLocation();
 
     useEffect(() => {
+        console.log(loggedIn);
         if (loggedIn === false) navigate(Pages.AccountManager);
         if (location.pathname === "/") navigate(Pages.Home);
     });

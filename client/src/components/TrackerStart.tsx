@@ -15,18 +15,18 @@ export function TrackerStart({workout, setWorkoutProp}: { workout: TrackedWorkou
         setWorkoutProp("type", type)
         setWorkoutProp("lifts", [])
         setWorkoutProp("date", new Date())
-        navigate(Pages.TrackPage)
+        navigate("/" + Pages.TrackPage)
     }
 
     useEffect(() => {
-        if (workout !== NoWorkout) navigate(`${Pages.TrackerPage}/${Pages.TrackPage}`)
+        if (workout !== NoWorkout) navigate(`/${Pages.TrackerPage}/${Pages.TrackPage}`)
     }, [navigate, workout]);
 
     return (
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
+                    <img src="/icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>

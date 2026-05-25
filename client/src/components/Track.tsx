@@ -42,7 +42,12 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
 
     const remLift = (lift: number) => {
         const copy = structuredClone(workout.lifts).filter((_, i) => i !== lift);
+        setLift(copy.length === 0 ? -1 : copy.length);
         setWorkoutProp("lifts", copy);
+
+        console.log(lift)
+        console.log(copy.length)
+        console.log(workout.lifts[lift].exercise_id)
     }
 
     const updateRep = (liftIndex: number, setIndex: number, field: "weight" | "reps", value: number) => {
@@ -106,18 +111,21 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
     }, [selectedExercise]);
 
     useEffect(() => {
-        if (workout === NoWorkout) navigate(`${Pages.TrackerPage}/${Pages.StartPage}`)
+        if (workout === NoWorkout) navigate(`/${Pages.TrackerPage}/${Pages.StartPage}`)
     }, [navigate, workout]);
 
     useEffect(() => {
         sessionStorage.setItem("lift", JSON.stringify(lift));
     }, [lift]);
 
+    console.log(workout.lifts)
+    console.log(lift)
+
     return (
         <div className={homeStyles.page}>
             <header className={homeStyles.appHeader}>
                 <div className={homeStyles.headerLeft}>
-                    <img src="icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
+                    <img src="/icon.png" alt="Workout Tracker Logo" className={homeStyles.logo}/>
                 </div>
 
                 <div className={homeStyles.headerCenter}>
@@ -145,7 +153,7 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                                 {!pickExercise && (
                                     <div className={styles.searchRow}>
                                         <button className={styles.iconButton}
-                                                onClick={() => navigate(`${Pages.TrackerPage}/${Pages.SearchPage}`)}
+                                                onClick={() => navigate(`/${Pages.TrackerPage}/${Pages.SearchPage}`)}
                                                 data-tooltip="Find Exercise">🔎
                                         </button>
 
@@ -306,14 +314,18 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                                         ))}
 
                                         <div className={styles.supersetButtons2}>
-                                            <button onClick={() => addSet(lift)} className={styles.addButton}>Add Set
+                                            <button onClick={() => addSet(lift)} className={styles.addButton}>
+                                                Add Set
                                             </button>
+
                                             <button onClick={() => {
+                                                if (workout.lifts[lift].set.length === 0) remLift(lift)
                                                 setLift(-1)
                                                 setAdding(false)
                                                 pickedExercise(false)
                                                 setExercise("")
-                                            }} className={styles.compButton}>Done
+                                            }} className={styles.compButton}>
+                                                Done
                                             </button>
                                         </div>
                                     </div>
@@ -436,15 +448,15 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
 
                                         {value.set.map((set, setIndex) => (
                                             <div key={setIndex}>
-                                                <div className={styles.repRow}>
-                                                    <label> Set {setIndex + 1} |</label>
+                                                <div className={`${styles.repRow} ${styles.recordedSummaryRow}`}>
+                                                    <label> Set {setIndex + 1}</label>
 
                                                     <div className={styles.field}>
-                                                        <label> Weight: {set.weight} </label>
+                                                        <label>Weight: {set.weight}</label>
                                                     </div>
 
                                                     <div className={styles.field}>
-                                                        <label> Reps: {set.reps} </label>
+                                                        <label>Reps: {set.reps}</label>
                                                     </div>
                                                 </div>
 
@@ -452,21 +464,15 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                                                     {set.superset?.map((ss, ssIndex) => (
                                                         <div key={ssIndex} className={styles.supersets}>
                                                             <div className={styles.field}>
-                                                                <label className={styles.label2}>
-                                                                    Lift: {ss.exercise_id}
-                                                                </label>
+                                                                <label className={styles.label2}>Lift: {ss.exercise_id}</label>
                                                             </div>
 
                                                             <div className={styles.field}>
-                                                                <label className={styles.label2}>
-                                                                    Weight: {ss.weight}
-                                                                </label>
+                                                                <label className={styles.label2}>Weight: {ss.weight}</label>
                                                             </div>
 
                                                             <div className={styles.field}>
-                                                                <label className={styles.label2}>
-                                                                    Reps: {ss.reps}
-                                                                </label>
+                                                                <label className={styles.label2}>Reps: {ss.reps}</label>
                                                             </div>
                                                         </div>
                                                     ))}

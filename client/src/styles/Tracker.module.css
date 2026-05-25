@@ -801,6 +801,190 @@ h1 {
 }
 
 @media (max-width: 640px) {
+    .profileContainer {
+        padding: 1rem 0.75rem 1.25rem;
+        align-items: flex-start;
+    }
+
+    .selectorCard {
+        max-width: 100%;
+        padding: 16px 12px 18px;
+        border-radius: 14px;
+        gap: 12px;
+    }
+
+    .innerCard,
+    .setCard,
+    .setCard2 {
+        max-width: 100%;
+        padding: 16px 12px;
+        border-radius: 12px;
+    }
+
+    .heading {
+        font-size: 1.35rem;
+    }
+
+    .heading2 {
+        font-size: 1.2rem;
+    }
+
+    .searchRow {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding-top: 0.5rem;
+    }
+
+    .iconButton,
+    .confirmButton {
+        width: 100%;
+    }
+
+    .autocomplete,
+    .autocomplete2 {
+        width: 100%;
+    }
+
+    .selectorInput,
+    .selectorInput2 {
+        font-size: 0.95rem;
+        padding: 12px 14px;
+    }
+
+    .repRow {
+        flex-wrap: wrap;
+        margin-left: 0;
+        align-items: flex-start;
+    }
+
+    .recordedSummaryRow {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 2px 6px;
+    }
+
+    .recordedSummaryRow > label,
+    .recordedSummaryRow > .field {
+        flex: 0 1 auto;
+        min-width: 0;
+        white-space: nowrap;
+    }
+
+    .recordedSummaryRow .field {
+        display: inline-flex;
+        width: auto;
+        flex: 0 1 auto;
+    }
+
+    .repIndex {
+        width: 100%;
+        padding-top: 0;
+        padding-right: 0;
+        text-align: left;
+    }
+
+    .field {
+        flex: 1 1 42%;
+        min-width: 120px;
+    }
+
+    .label,
+    .label2 {
+        width: 100%;
+    }
+
+    .input {
+        width: 100%;
+    }
+
+    .supersetButtons,
+    .supersetButtons2 {
+        width: 100%;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+    }
+
+    .compButtonRec,
+    .compButton,
+    .remButton,
+    .remButtonRec,
+    .addButton,
+    .completeButton,
+    .removeButton2,
+    .trackButton {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .compButtonRec,
+    .remButtonRec {
+        position: static;
+        right: auto;
+        margin-bottom: 0;
+    }
+
+    .controlButtons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .supersetsRow {
+        margin-left: 0;
+    }
+
+    .setCard2 {
+        margin-bottom: 22px;
+        padding: 18px 14px;
+    }
+
+    .supersets {
+        flex-direction: column;
+        gap: 10px;
+        margin-left: 0;
+        padding-bottom: 14px;
+    }
+
+    .headerDone {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 8px;
+        position: static;
+        text-align: center;
+    }
+
+    .headerDone h4 {
+        margin: 0;
+    }
+
+    .headerDone + div {
+        margin-top: 12px;
+    }
+
+    .repRow,
+    .supersetRow,
+    .repRow2,
+    .supersetRow2 {
+        margin-left: 0;
+        gap: 10px;
+    }
+
+    .supersetRow {
+        flex-wrap: wrap;
+    }
+
+    .completeButton,
+    .removeButton2 {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+    }
+
     .exerciseCard {
         padding: 12px 14px;
     }
@@ -821,5 +1005,21 @@ h1 {
 
     .instructions li {
         font-size: 0.85rem;
+    }
+
+    .controlButtons {
+        margin-top: 6px;
+    }
+
+    .trackButton,
+    .completeButton,
+    .removeButton2,
+    .addButton,
+    .compButton,
+    .remButton,
+    .compButtonRec,
+    .remButtonRec {
+        font-size: 0.95rem;
+        padding: 0.9rem 1rem;
     }
 }

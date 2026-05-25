@@ -68,6 +68,11 @@ export async function changePasswordClient(data: ModifyUserData) {
 }
 
 export async function checkAuth() {
-    const res = await fetch(URL + "/auth/me", {credentials: "include"});
-    return res.ok;
+    try {
+        const res = await fetch(URL + "/auth/me", {credentials: "include"});
+        return res.ok;
+    } catch (e) {
+        console.error(e);
+        return false;
+    }
 }

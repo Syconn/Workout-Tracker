@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useState} from "react";
+import {URL} from "./data.ts";
 
 export function useDebounce<T>(value: T, delay: number): T {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -21,7 +22,7 @@ export function useTypeState<T>(val: T | (() => T)): [T, <K extends keyof T>(key
 }
 
 export function getExerciseImage(images: string[]) {
-    return {start: `images/${images[0]}`, end: `images/${images[1]}`};
+    return {start: `${URL}/api${images[0]}`, end: `${URL}/api${images[1]}`};
 }
 
 export function capitalize(s: string): string {

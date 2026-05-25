@@ -129,3 +129,31 @@
 .primary:hover {
     background-color: #16a34a;
 }
+
+@media (max-width: 640px) {
+    .appHeader {
+        height: 60px;
+        padding: 0 0.75rem;
+        grid-template-columns: auto 1fr auto;
+    }
+
+    .logo {
+        height: 40px;
+    }
+
+    .title {
+        font-size: 1.1rem;
+        padding: 0.35rem 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .accountIcon {
+        width: 32px;
+        height: 32px;
+    }
+
+    .accountIcon svg {
+        width: 18px;
+        height: 18px;
+    }
+}
