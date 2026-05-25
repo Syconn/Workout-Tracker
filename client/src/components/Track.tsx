@@ -44,10 +44,6 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
         const copy = structuredClone(workout.lifts).filter((_, i) => i !== lift);
         setLift(copy.length === 0 ? -1 : copy.length);
         setWorkoutProp("lifts", copy);
-
-        console.log(lift)
-        console.log(copy.length)
-        console.log(workout.lifts[lift].exercise_id)
     }
 
     const updateRep = (liftIndex: number, setIndex: number, field: "weight" | "reps", value: number) => {
@@ -117,9 +113,6 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
     useEffect(() => {
         sessionStorage.setItem("lift", JSON.stringify(lift));
     }, [lift]);
-
-    console.log(workout.lifts)
-    console.log(lift)
 
     return (
         <div className={homeStyles.page}>
@@ -435,7 +428,6 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                                         <div className={styles.headerDone}>
                                             <h4>{value.exercise_id}</h4>
                                             <button onClick={() => {
-                                                // console.log(pastWorkout.lastLifted)
                                                 pickedExercise(true)
                                                 setAdding(true)
                                                 setLift(index)

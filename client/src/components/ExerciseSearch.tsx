@@ -63,7 +63,7 @@ function ExerciseSearch({ workouts, fuse} : { workouts: ExerciseDB[]; fuse: Fuse
 
             <main className={styles.profileContainer}>
                 <div className={styles.selectorCard}>
-                    <h1>Workout Tracker</h1>
+                    <h1 className={styles.heading}>Workout Tracker</h1>
 
                     <div className={styles.controls}>
                         <div className={styles.categoryRow}>

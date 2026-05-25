@@ -802,15 +802,15 @@ h1 {
 
 @media (max-width: 640px) {
     .profileContainer {
-        padding: 1rem 0.75rem 1.25rem;
+        padding: 0.85rem 0.65rem 1rem;
         align-items: flex-start;
     }
 
     .selectorCard {
         max-width: 100%;
-        padding: 16px 12px 18px;
+        padding: 14px 10px 16px;
         border-radius: 14px;
-        gap: 12px;
+        gap: 10px;
     }
 
     .innerCard,
@@ -827,6 +827,114 @@ h1 {
 
     .heading2 {
         font-size: 1.2rem;
+    }
+
+    .selectorCard h1 {
+        font-size: 1.35rem;
+        text-align: center;
+        margin: 0.2rem 0 0.25rem;
+    }
+
+    .controls {
+        align-items: stretch;
+        gap: 10px;
+        margin-bottom: 6px;
+    }
+
+    .categoryRow {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+
+    .categoryLabel {
+        white-space: normal;
+        font-size: 0.8rem;
+        text-align: left;
+    }
+
+    .categorySelect {
+        width: 100%;
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+
+    .toggle {
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        gap: 8px;
+    }
+
+    .stickySearch {
+        padding-top: 12px;
+    }
+
+    .selectorInput {
+        font-size: 1rem;
+        padding: 12px 14px;
+    }
+
+    .pills {
+        justify-content: flex-start;
+        gap: 6px;
+        margin-top: 10px;
+        padding-bottom: 8px;
+    }
+
+    .pill {
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .resultsMeta {
+        font-size: 0.78rem;
+        margin-top: 2px;
+    }
+
+    .results {
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    .exerciseCard {
+        padding: 12px 12px;
+    }
+
+    .cardTitle {
+        font-size: 1rem;
+    }
+
+    .metaRow {
+        gap: 4px;
+        font-size: 0.78rem;
+        margin-bottom: 8px;
+    }
+
+    .imageWrapper {
+        margin: 8px 0 10px;
+    }
+
+    .exerciseImage {
+        height: 150px;
+    }
+
+    .instructions {
+        padding-left: 16px;
+        font-size: 0.82rem;
+        margin-top: 6px;
+    }
+
+    .instructions li {
+        margin-bottom: 5px;
+        line-height: 1.35;
+    }
+
+    .expandButton {
+        font-size: 0.75rem;
     }
 
     .searchRow {
