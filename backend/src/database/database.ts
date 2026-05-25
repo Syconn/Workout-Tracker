@@ -33,6 +33,45 @@ export async function initDB(): Promise<Database> {
         )
     `);
 
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS lifts (
+            id               INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id          INTEGER NOT NULL,
+            type             TEXT,
+            date             TEXT,
+            duration_minutes INTEGER
+        )
+    `)
+
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS exercises (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            workout_id     INTEGER NOT NULL,
+            exercise_id    TEXT    NOT NULL,
+            exercise_order INTEGER
+        )
+    `)
+
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS sets (
+            id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+            workout_exercise_id INTEGER NOT NULL,
+            set_number          INTEGER,
+            weight              REAL,
+            reps                INTEGER
+        );
+    `)
+
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS supersets (
+            id            INTEGER PRIMARY KEY AUTOINCREMENT,
+            parent_set_id INTEGER NOT NULL,
+            exercise_id   TEXT,
+            weight        REAL,
+            reps          INTEGER
+        );
+    `)
+
     return db
 }
 

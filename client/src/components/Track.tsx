@@ -3,9 +3,10 @@ import {useLocation, useNavigate} from "react-router-dom";
 import homeStyles from "../styles/Home.module.css";
 import styles from "../styles/Tracker.module.css";
 import {Home} from "lucide-react";
-import {ExerciseDB, NoWorkout, Pages, Superset, TrackedWorkout} from "../utils/data.ts";
+import {ExerciseDB, NoWorkout, Pages, Superset, TrackedWorkout, WorkoutSet} from "../utils/data.ts";
 import Fuse from "fuse.js";
 import {capitalize} from "../utils/util.ts";
+import {loadLastLift, loadPr} from "../network/userRequests.ts";
 
 export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: {
     workout: TrackedWorkout,
@@ -23,11 +24,13 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
     });
     const [pickExercise, pickedExercise] = useState(lift !== -1)
     const [adding, setAdding] = useState(lift !== -1)
+    const [last, setLast] = useState<WorkoutSet[] | undefined>(undefined);
+    const [pr, setPr] = useState<WorkoutSet | undefined>(undefined);
 
     const navigate = useNavigate();
     const location = useLocation();
     const selectedExercise = location.state?.exercise ?? null;
-    // const last = workout.lifts[lift] !== undefined && pastWorkout.lastLifted.has(workout.lifts[lift].exercise_id) ? pastWorkout.lastLifted.get(workout.lifts[lift].exercise_id) : undefined
+    
     // const pr = workout.lifts[lift] !== undefined && pastWorkout.recordLift.has(workout.lifts[lift].exercise_id) ? pastWorkout.recordLift.get(workout.lifts[lift].exercise_id) : undefined
     // const prSet = pr !== undefined ? pastWorkout.workouts[pr[0]].lifts[pr[1]].set[pr[2]] : undefined
     const results = fuse.search(exercise).map(r => r.item);
@@ -98,6 +101,16 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
         rep.superset = rep.superset.filter((_, index) => index !== ssIndex);
         setWorkoutProp("lifts", copy);
     };
+
+    useEffect(() => {
+        const load = async () => setLast(await loadLastLift(workout.lifts[lift].exercise_id))
+        if (workout.lifts[lift] !== undefined) void load()
+    }, [lift, workout.lifts]);
+
+    useEffect(() => {
+        const load = async () => setPr(await loadPr(workout.lifts[lift].exercise_id))
+        if (workout.lifts[lift] !== undefined) void load()
+    }, [lift, workout.lifts]);
 
     useEffect(() => {
         if (selectedExercise != null) {
@@ -327,95 +340,94 @@ export function Track({workout, fuse, setWorkoutProp, setWorkout, saveWorkout}: 
                         )}
                     </div>
 
-                    {/*{last !== undefined && (*/}
-                    {/*    <div className={styles.innerCard}>*/}
-                    {/*        <h2 className={styles.heading2}>Last Time</h2>*/}
+                    {last && (
+                        <div className={styles.innerCard}>
+                            <h2 className={styles.heading2}>Last Time</h2>
 
-                    {/*        <div className={styles.setCard2}>*/}
-                    {/*            {pastWorkout.workouts[last[0]].lifts[last[1]].set.map(((set, setIndex) => (*/}
-                    {/*                <div key={setIndex}>*/}
-                    {/*                    <div className={styles.repRow}>*/}
-                    {/*                        <label> Set {setIndex + 1} |</label>*/}
+                            <div className={styles.setCard2}>
+                                {last.map((set, setIndex) => (
+                                    <div key={setIndex}>
+                                        <div className={styles.repRow}>
+                                            <label>Set {setIndex + 1} |</label>
 
-                    {/*                        <div className={styles.field}>*/}
-                    {/*                            <label> Weight: {set.weight} </label>*/}
-                    {/*                        </div>*/}
+                                            <div className={styles.field}>
+                                                <label>Weight: {set.weight}</label>
+                                            </div>
 
-                    {/*                        <div className={styles.field}>*/}
-                    {/*                            <label> Reps: {set.reps} </label>*/}
-                    {/*                        </div>*/}
-                    {/*                    </div>*/}
+                                            <div className={styles.field}>
+                                                <label>Reps: {set.reps}</label>
+                                            </div>
+                                        </div>
 
-                    {/*                    <div className={styles.supersetsRow}>*/}
-                    {/*                        {set.superset?.map((ss, ssIndex) => (*/}
-                    {/*                            <div key={ssIndex} className={styles.supersets}>*/}
-                    {/*                                <div className={styles.field}>*/}
-                    {/*                                    <label className={styles.label2}>*/}
-                    {/*                                        Lift: {ss.exercise_id}*/}
-                    {/*                                    </label>*/}
-                    {/*                                </div>*/}
+                                        <div className={styles.supersetsRow}>
+                                            {set.superset?.map(
+                                                (ss, ssIndex) => (
+                                                    <div key={ssIndex} className={styles.supersets}>
+                                                        <div className={styles.field}>
+                                                            <label className={styles.label2}>
+                                                                Lift: {ss.exercise_id}
+                                                            </label>
+                                                        </div>
 
-                    {/*                                <div className={styles.field}>*/}
-                    {/*                                    <label className={styles.label2}>*/}
-                    {/*                                        Weight: {ss.weight}*/}
-                    {/*                                    </label>*/}
-                    {/*                                </div>*/}
+                                                        <div className={styles.field}>
+                                                            <label className={styles.label2}>
+                                                                Weight: {ss.weight}
+                                                            </label>
+                                                        </div>
 
-                    {/*                                <div className={styles.field}>*/}
-                    {/*                                    <label className={styles.label2}>*/}
-                    {/*                                        Reps: {ss.reps}*/}
-                    {/*                                    </label>*/}
-                    {/*                                </div>*/}
-                    {/*                            </div>*/}
-                    {/*                        ))}*/}
-                    {/*                    </div>*/}
-                    {/*                </div>*/}
-                    {/*            )))}*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
+                                                        <div className={styles.field}>
+                                                            <label className={styles.label2}>
+                                                                Reps: {ss.reps}
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                )
+                                            )}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
 
-                    {/*{pr !== undefined && prSet !== undefined && (*/}
-                    {/*    <div className={styles.innerCard}>*/}
-                    {/*        <h2 className={styles.heading2}>Personal Record</h2>*/}
+                    {pr && (
+                        <div className={styles.innerCard}>
+                            <h2 className={styles.heading2}>Personal Record</h2>
 
-                    {/*        <div className={styles.setCard2}>*/}
-                    {/*            <div className={styles.repRow}>*/}
-                    {/*                <div className={styles.field}>*/}
-                    {/*                    <label> Weight: {prSet.weight} </label>*/}
-                    {/*                </div>*/}
+                            <div className={styles.setCard2}>
+                                <div className={styles.repRow}>
+                                    <div className={styles.field}>
+                                        <label>Weight: {pr.weight}</label>
+                                    </div>
 
-                    {/*                <div className={styles.field}>*/}
-                    {/*                    <label> Reps: {prSet.reps} </label>*/}
-                    {/*                </div>*/}
-                    {/*            </div>*/}
+                                    <div className={styles.field}>
+                                        <label>Reps: {pr.reps}</label>
+                                    </div>
+                                </div>
 
-                    {/*            <div className={styles.supersetsRow}>*/}
-                    {/*                {prSet.superset?.map((ss, ssIndex) => (*/}
-                    {/*                    <div key={ssIndex} className={styles.supersets}>*/}
-                    {/*                        <div className={styles.field}>*/}
-                    {/*                            <label className={styles.label2}>*/}
-                    {/*                                Lift: {ss.exercise_id}*/}
-                    {/*                            </label>*/}
-                    {/*                        </div>*/}
+                                {pr.superset && pr.superset.length > 0 && (
+                                    <div className={styles.supersetsRow}>
 
-                    {/*                        <div className={styles.field}>*/}
-                    {/*                            <label className={styles.label2}>*/}
-                    {/*                                Weight: {ss.weight}*/}
-                    {/*                            </label>*/}
-                    {/*                        </div>*/}
+                                        {pr.superset.map((ss, ssIndex) => (
+                                            <div key={ssIndex} className={styles.supersets}>
+                                                <div className={styles.field}>
+                                                    <label className={styles.label2}>Lift: {ss.exercise_id}</label>
+                                                </div>
 
-                    {/*                        <div className={styles.field}>*/}
-                    {/*                            <label className={styles.label2}>*/}
-                    {/*                                Reps: {ss.reps}*/}
-                    {/*                            </label>*/}
-                    {/*                        </div>*/}
-                    {/*                    </div>*/}
-                    {/*                ))}*/}
-                    {/*            </div>*/}
-                    {/*        </div>*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
+                                                <div className={styles.field}>
+                                                    <label className={styles.label2}>Weight: {ss.weight}</label>
+                                                </div>
+
+                                                <div className={styles.field}>
+                                                    <label className={styles.label2}>Reps: {ss.reps}</label>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Recorded Workouts */}
                     {((workout.lifts.length > 0 && !adding) || (workout.lifts.length > 1)) && (

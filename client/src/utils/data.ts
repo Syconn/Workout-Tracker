@@ -13,12 +13,6 @@ export type ExerciseDB = {
     images: string[];
 };
 
-// export type Workouts = {
-//     workouts: TrackedWorkout[]
-//     lastLifted: Map<string, [number, number]> // Prevent needing to save two copies
-//     recordLift: Map<string, [number, number, number]>
-// }
-
 export type TrackedWorkout = {
     type: string;
     date: Date | string;
@@ -28,10 +22,10 @@ export type TrackedWorkout = {
 
 export type Lift = {
     exercise_id: string;
-    set: Set[];
+    set: WorkoutSet[];
 }
 
-export type Set = {
+export type WorkoutSet = {
     weight: number;
     reps: number;
     superset?: Superset[]
@@ -64,18 +58,7 @@ export const NoWorkout: TrackedWorkout = {
     workout_length_minutes: 0,
 }
 
-// export const NoSavedWorkouts: Workouts = {
-//     workouts: [],
-//     lastLifted: new Map<string, [number, number]>(),
-//     recordLift: new Map<string, [number, number, number]>()
-// }
-
 export const Muscles= ['abdominals', 'hamstrings', 'calves', 'shoulders', 'adductors', 'glutes', 'quadriceps', 'biceps', 'forearms', 'abductors', 'triceps', 'chest', 'lower back', 'traps', 'middle back', 'lats', 'neck']
-export const Equipment = ['body only', 'machine', 'other', 'foam roll', 'kettlebells', 'dumbbell', 'cable', 'barbell', 'bands', 'medicine ball', 'exercise ball', 'e-z curl bar']
-// export const Mechanic = ['compound', 'isolation']
-// export const Level = ['beginner', 'intermediate', 'expert']
-// export const Category = ['strength', 'stretching', 'plyometrics', 'strongman', 'powerlifting', 'cardio', 'olympic weightlifting']
-
 export const MuscleGroups = {
     Legs: ['hamstrings', 'calves', 'adductors', 'glutes', 'quadriceps', 'abdominals'],
     Push: ['chest', 'triceps', 'shoulders'],

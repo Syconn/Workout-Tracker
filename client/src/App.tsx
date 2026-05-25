@@ -6,7 +6,7 @@ import RegisterMenu from "./components/RegisterMenu.tsx";
 import {useEffect, useMemo, useState} from "react";
 import AccountManager from "./pages/AccountManager.tsx";
 import {UNLOADED_USER, UserData} from "./network/networkData.ts";
-import {userInfo} from "./network/userRequests.ts";
+import {saveWorkoutClient, userInfo} from "./network/userRequests.ts";
 import Home from "./pages/Home.tsx";
 import HomeMenu from "./components/HomeMenu.tsx";
 import {checkAuth} from "./network/authRequests.ts";
@@ -47,7 +47,14 @@ function App() {
 
 	const fuse = useMemo(() => createFuse(workouts), [workouts])
 
-	const saveWorkout = () => {}
+	const saveWorkout = () => {
+		const date = trackedWorkout.date instanceof Date ? trackedWorkout.date : new Date(trackedWorkout.date)
+		setTrackedWorkoutProp("workout_length_minutes", Math.round(Math.abs(date.getTime() - new Date().getTime()) / 60000))
+		void saveWorkoutClient(trackedWorkout)
+		localStorage.removeItem("trackedWorkout")
+		sessionStorage.removeItem("lift")
+		setTrackedWorkout(NoWorkout)
+	}
 
 	return (
 		<BrowserRouter>
