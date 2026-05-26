@@ -110,7 +110,10 @@ function RegisterMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void 
             <div className={styles.loginBox}>
                 <h2 className={styles.title}>Register</h2>
 
-                <form>
+                <form onSubmit={e => {
+                    e.preventDefault();
+                    void register();
+                }}>
                     <div className={styles.inputGroup}>
                         <User className={styles.icon} size={18} />
                         <input
@@ -194,7 +197,7 @@ function RegisterMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void 
                     {errorField === "passwordConfirm" && (<p className={styles.errorText}>Please confirm your password.</p>)}
                     {(passwordsMismatch || errorField === "passwordMismatch") && (<p className={styles.errorText}>⚠ Passwords do not match.</p>)}
 
-                    <button className={styles.loginButton} onClick={register}>Register</button>
+                    <button className={styles.loginButton} type="submit">Register</button>
 
                     <div className={styles.footer}>
                         Already have an account?
