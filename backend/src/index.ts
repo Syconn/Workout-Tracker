@@ -21,7 +21,7 @@ const server = createServer(app);
 await initDB();
 await seedWorkoutsIfEmpty();
 
-app.use(cors({ origin: "http://192.168.1.247:8080", credentials: true }))
+app.use(cors({ origin: true, credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use("/auth", authRoutes);
@@ -31,7 +31,7 @@ app.use("/api", apiRoute);
 
 const io = new Server(server, {
     cors: {
-        origin: "http://192.168.1.247:8080",
+        origin: true,
         credentials: true
     }
 });

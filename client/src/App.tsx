@@ -19,7 +19,7 @@ import {useTypeState} from "./utils/util.ts";
 import ExerciseSearch from "./components/ExerciseSearch.tsx";
 import {Track} from "./components/Track.tsx";
 
-function App() { // TODO May need to support reloading exercises post login or make it public  data
+function App() { // TODO ALL PR AND WORKOUT DATA CRAPS THE BED WHEN IT REALIZES THERE NO WORKOUT YET DONE FOR IT
 	const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
 	const [userData, setUserData] = useState<UserData>(UNLOADED_USER);
 	const [workouts, setWorkouts] = useState([]);
