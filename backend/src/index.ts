@@ -7,7 +7,7 @@ import cookieParser from "cookie-parser";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
 import authRoutes from "./routes/authRoute.js";
-import {jwtSecret, port} from "./config/keys.js";
+import {clientUrl, jwtSecret, port} from "./config/keys.js";
 import statusRoutes from "./routes/statusRoutes.js";
 import userRoute from "./routes/userRoutes.js";
 import {initDB} from "./database/database.js";
@@ -21,7 +21,7 @@ const server = createServer(app);
 await initDB();
 await seedWorkoutsIfEmpty();
 
-app.use(cors({ origin: true, credentials: true }))
+app.use(cors({ origin: clientUrl(), credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use("/auth", authRoutes);
@@ -31,7 +31,7 @@ app.use("/api", apiRoute);
 
 const io = new Server(server, {
     cors: {
-        origin: true,
+        origin: clientUrl(),
         credentials: true
     }
 });
@@ -49,6 +49,6 @@ io.use((socket, next) => {
     }
 });
 
-server.listen(port(), () => {
-    console.log("Server running on http://localhost:" + port());
+server.listen(Number(port()) || 3000, "0.0.0.0", () => {
+    console.log("Server running on port:" + port());
 });

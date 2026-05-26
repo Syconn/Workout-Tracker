@@ -1,4 +1,4 @@
-export const URL = "/api";
+export const URL = import.meta.env.VITE_API_URL;
 
 export type ExerciseDB = {
     name: string;

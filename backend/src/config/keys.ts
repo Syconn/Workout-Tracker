@@ -9,3 +9,9 @@ export function port() {
     if (!key) throw new Error("Port is not defined")
     return key
 }
+
+export function clientUrl() {
+    const key = process.env.CLIENT_URL;
+    if (!key) throw new Error("IP address is not defined")
+    return key
+}
