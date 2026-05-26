@@ -43,9 +43,9 @@ export async function loadLastLift(exerciseId: string) {
         body: JSON.stringify({ exerciseId }),
     })
 
-    const body = await res.json();
-    if (!res.ok) console.log(body.error);
-    return body as WorkoutSet[];
+    const text = await res.text();
+    if (!text) return undefined;
+    return JSON.parse(text) as WorkoutSet[];
 }
 
 export async function loadPr(exerciseId: string) {
@@ -57,6 +57,12 @@ export async function loadPr(exerciseId: string) {
     })
 
     const body = await res.json();
-    if (!res.ok) console.log(body.error);
-    return body as WorkoutSet;
+    if (!res.ok) {
+        console.log(body.error);
+        return undefined
+    }
+
+    const text = await res.text();
+    if (!text) return undefined;
+    return JSON.parse(text) as WorkoutSet;
 }
