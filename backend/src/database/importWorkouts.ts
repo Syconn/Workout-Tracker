@@ -1,6 +1,6 @@
 import {getDB} from "./database.js";
 import * as fs from "node:fs";
-import path = require("node:path");
+import * as path from "node:path";
 
 export async function seedWorkoutsIfEmpty() {
     const db = getDB();
