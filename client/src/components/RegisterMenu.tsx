@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from "react";
 import {Eye, EyeOff, Loader2, Lock, Mail, User} from "lucide-react";
 import styles from "../styles/AccountManager.module.css"
-import {Link} from "react-router-dom";
+import {Link, useNavigate} from "react-router-dom";
 import {useDebounce} from "../utils/util.ts";
 import {registerClient, validateUsername} from "../network/authRequests.ts";
 import {Pages} from "../utils/data.ts";
@@ -20,6 +20,8 @@ function RegisterMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void 
 
     const passwordsMismatch = passwordConfirm.length > 0 && password !== passwordConfirm;
     const debouncedText = useDebounce(username, 1000);
+
+    const navigate = useNavigate();
 
     const register = async () => {
         const valid = await validateUsername(username);
@@ -66,6 +68,7 @@ function RegisterMenu({ setLoggedIn } : { setLoggedIn: (login: boolean) => void 
 
         setErrorField("");
         await registerClient({name, email, username, password}, setLoggedIn)
+        navigate(Pages.Home)
     };
 
     const handleInput = (field: string, setter: (v: string) => void) => (e: React.ChangeEvent<HTMLInputElement>) => {
