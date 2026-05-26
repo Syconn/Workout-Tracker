@@ -1,4 +1,4 @@
-export const URL = import.meta.env.NODE_ENV === 'production' ? undefined : 'http://localhost:4000';
+export const URL = import.meta.env.VITE_API_URL;
 
 export type ExerciseDB = {
     name: string;

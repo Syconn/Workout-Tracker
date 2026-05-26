@@ -1,5 +1,6 @@
 import {getDB} from "./database.js";
 import * as fs from "node:fs";
+import path = require("node:path");
 
 export async function seedWorkoutsIfEmpty() {
     const db = getDB();
@@ -7,7 +8,8 @@ export async function seedWorkoutsIfEmpty() {
 
     if (row.count === 0) {
         console.log("Importing workouts...");
-        const workouts = JSON.parse(fs.readFileSync("./src/database/exercises.json", "utf8"));
+        const workoutsPath = path.join(process.cwd(), "src/database/exercises.json");
+        const workouts = JSON.parse(fs.readFileSync(workoutsPath, "utf8"));
 
         for (const workout of workouts) {
             await db.run(`

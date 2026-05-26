@@ -1,3 +1,4 @@
 /backend/.env
 /backend/database.sqlite
+client/.env.production
 AGENTS.md

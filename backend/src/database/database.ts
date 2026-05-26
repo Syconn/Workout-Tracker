@@ -4,7 +4,7 @@ import sqlite3 from "sqlite3";
 let db: Database
 
 export async function initDB(): Promise<Database> {
-    db = await open({ filename: "./database.sqlite", driver: sqlite3.Database })
+    db = await open({ filename: "/app/data/database.sqlite", driver: sqlite3.Database })
 
     await db.exec(`
         CREATE TABLE IF NOT EXISTS accounts (
